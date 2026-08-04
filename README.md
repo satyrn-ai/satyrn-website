@@ -13,6 +13,12 @@ Every recipe shells out to `uv`,
 which handles Python and Zensical for you,
 so there's nothing else to install and no virtualenv to activate.
 
+Two checks reach further:
+`just lint` needs node, and `just check-a11y` needs node plus a Chrome
+or Chromium.
+Both fail with a message saying so rather than silently,
+and GitHub runners have all of it preinstalled.
+
 ## Using it
 
 `just` on its own lists every command:

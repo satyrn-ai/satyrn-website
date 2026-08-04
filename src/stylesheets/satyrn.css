@@ -81,6 +81,10 @@ html:has(> body[data-md-color-scheme="slate"]) { color-scheme: dark; }
   --satyrn-card-bg: var(--satyrn-card-light);
   --satyrn-border: rgb(28 26 23 / 15%);
   --satyrn-mark-filter: none;
+
+  /* The theme's --md-default-fg-color--light only reaches 4.35:1 on the
+     footer's meta bar (12% ink over cream). One step darker passes at 4.7:1. */
+  --satyrn-copyright: #665a49;
 }
 
 /* `--md-hue` drives every colour the slate scheme derives in HSL — code
@@ -111,6 +115,9 @@ html:has(> body[data-md-color-scheme="slate"]) { color-scheme: dark; }
 
   --satyrn-card-bg: var(--satyrn-card-dark);
   --satyrn-border: rgb(240 230 210 / 15%);
+
+  /* The theme's own value: already 5.6:1 on this scheme's meta bar. */
+  --satyrn-copyright: var(--md-default-fg-color--light);
 
   /* The balloon string is a thin dark stroke with nothing behind it, so on the
      dark background it all but disappears. A soft halo restores it without
@@ -272,6 +279,13 @@ html:has(> body[data-md-color-scheme="slate"]) { color-scheme: dark; }
   .satyrn-home-nav > .md-sidebar--primary {
     display: none;
   }
+}
+
+/* ----------------------------------------------------------- docs footer -- */
+
+/* Contrast fix; the numbers live with the token in the scheme blocks. */
+.md-copyright {
+  color: var(--satyrn-copyright);
 }
 
 /* ----------------------------------------------------------- block: hero -- */
