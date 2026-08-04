@@ -468,6 +468,31 @@ title = "Get Involved"
 [[project.extra.nav_tabs]]
 title = "Blog"
 
+# The tab bar, in order, rendered by overrides/partials/tabs.html. This is an
+# editorial list, not a mirror of the top level: Tags and Authors are top-level
+# sections and deliberately absent, and a new top-level page does not earn a tab
+# by existing.
+#
+# `page` is the nav item title to match, and defaults to `title` when omitted,
+# so it is only needed where the tab label differs from the page title. A `page`
+# that matches nothing drops the tab silently with a green build -- the same
+# trap as `nav_order` -- which is what `just check-nav` is for.
+[[project.extra.nav_tabs]]
+title = "Home"
+page = "Satyrn AI — AI Our Way"
+
+[[project.extra.nav_tabs]]
+title = "Mission"
+
+[[project.extra.nav_tabs]]
+title = "Local-First"
+
+[[project.extra.nav_tabs]]
+title = "Get Involved"
+
+[[project.extra.nav_tabs]]
+title = "Blog"
+
 # Authors. `name` is the only required key; `title`, `url`, `avatar` and
 # `fediverse` all degrade quietly when absent. A post naming a slug with no
 # table here fails the build, which is the one piece of referential integrity
