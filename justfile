@@ -222,7 +222,51 @@ check-blog: build
     print(f"\n{len(failures)} blog check(s) failed" if failures else "\nAll blog checks passed")
     sys.exit(1 if failures else 0)
 
-# Lint markdown and spelling. The only recipe that needs node; GitHub runners
+# Check every built page against axe-core's accessibility rules, in a real
+# browser because colour contrast only exists in computed styles. Covers the
+# light scheme at the default viewport; the rest of CONTRIBUTING's manual
+# list still stands.
+#
+# Needs npx plus a system Chrome or Chromium: GitHub runners ship both, macOS
+# Chrome is found in its app bundle, and Ubuntu's snap chromium refuses to
+# launch under puppeteer -- use the deb there. PUPPETEER_SKIP_DOWNLOAD stops
+# npx fetching a ~170 MB browser of its own.
+check-a11y: build
+    #!/usr/bin/env bash
+    set -euo pipefail
+    command -v npx >/dev/null || {
+      echo "check-a11y needs npx (ships with node). GitHub runners have it preinstalled;"
+      echo "locally, install node or skip this recipe."; exit 1; }
+    chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+    if [ -z "$chrome" ] && [ -x "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" ]; then
+      chrome="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+    fi
+    [ -n "$chrome" ] || {
+      echo "check-a11y needs Chrome or Chromium on the PATH. GitHub runners have it"
+      echo "preinstalled; locally, install one or skip this recipe."; exit 1; }
+    export PUPPETEER_SKIP_DOWNLOAD=1
+    config=""
+    trap 'rm -f "$config"' EXIT
+    config="$(mktemp)"
+    # json.dumps so an odd character in the path cannot break the JSON.
+    # Concurrency stays at the default of 2: 4 hit protocol errors and
+    # timeouts on pages that pass in isolation.
+    uv run python -c 'import json, sys; json.dump({"defaults": {
+      "runners": ["axe"], "timeout": 30000,
+      "chromeLaunchConfig": {"executablePath": sys.argv[1]}}}, open(sys.argv[2], "w"))' \
+      "$chrome" "$config"
+    # as_uri percent-encodes the checkout path; Zensical's slugs are safe bare.
+    prefix="$(uv run python -c 'import pathlib; print(pathlib.Path.cwd().as_uri())')"
+    pages=()
+    while IFS= read -r page; do
+      pages+=("$prefix/$page")
+    done < <(find site -name '*.html' | LC_ALL=C sort)
+    # Pipefail cannot see the process substitution, so zero pages must fail
+    # here rather than pass silently. Also fatal on macOS bash 3.2 if expanded.
+    [ ${#pages[@]} -gt 0 ] || { echo "no built pages found under site/"; exit 1; }
+    npx -y pa11y-ci@4.1.1 --config "$config" "${pages[@]}"
+
+# Lint markdown and spelling. Needs node, like check-a11y; GitHub runners
 # ship it preinstalled, so this costs a package download and no setup step.
 #
 # Versions are pinned. Unpinned, `npx -y` resolves latest on every run, so a new
@@ -325,4 +369,4 @@ og-image:
     magick identify -format 'src/assets/og-image.jpg  %wx%h  %b\n' src/assets/og-image.jpg
 
 # Everything CI should run before a merge
-ci: rebuild check-frontmatter check-nav check-blog check-assets lint weigh
+ci: rebuild check-frontmatter check-nav check-blog check-assets check-a11y lint weigh

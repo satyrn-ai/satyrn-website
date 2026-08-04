@@ -8,7 +8,8 @@ so it's worth a skim before your first change.
 Run `just ci` before opening a pull request.
 CI runs the same recipe:
 a strict build, a front-matter check, a navigation check, the blog checks,
-an asset-reference check, the linters, and the page weight report.
+an asset-reference check, an accessibility check of every built page,
+the linters, and the page weight report.
 
 Strict means `zensical build --strict`,
 which turns Zensical's warnings into a non-zero exit.
@@ -112,8 +113,13 @@ Put a real colour name back and dark mode returns to indigo links.
 ## Accessibility
 
 Treat this as part of the definition of done, not a later pass.
-`just lint` catches missing alt text, and that is roughly all it catches.
-Everything else here is on you.
+`just check-a11y` runs axe-core over every built page in a real browser,
+which is how it can measure the findings that only exist in computed styles,
+colour contrast above all.
+It sees the light scheme at the default viewport,
+and `just lint` catches missing alt text.
+Everything else here is on you:
+the dark scheme, focus visibility, target sizes, and 320px overflow.
 
 ### Images
 
