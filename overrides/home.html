@@ -7,20 +7,19 @@
 -#}
 
 {#-
-  `hero` sits above the content grid in base.html, so this spans the full width.
-  The home page hides the sidebar, so this is its only route to these pages.
+  The landing page runs full width, so it wants no sidebar on desktop -- but it
+  still needs the mobile drawer, which is the same element.
 
-  The three are listed explicitly rather than derived from `nav.items`. They are
-  an editorial choice about what the landing page promotes, not a mirror of the
-  sitemap -- once the blog lands, the nav tree grows and a derived list would
-  start advertising every new top-level section on its own.
+  `hide: navigation` in front matter cannot express that. It sets `hidden` on
+  the primary sidebar, and below 1220px the primary sidebar IS the drawer, with
+  nothing in the theme's CSS restoring it: the hamburger opens onto an empty
+  panel. So the suppression has to be a media query, and this wrapper is its
+  hook. `display: contents` keeps the sidebar a direct flex item of the grid,
+  so the wrapper changes no layout; `super()` renders the theme's own markup,
+  so this does not have to be kept in step with base.html.
 -#}
-{% block hero %}
-  <nav class="satyrn-sections" aria-label="Sections">
-    <a class="satyrn-sections__link" href="{{ 'mission/' | url }}">Mission</a>
-    <a class="satyrn-sections__link" href="{{ 'local-first/' | url }}">Local-First</a>
-    <a class="satyrn-sections__link" href="{{ 'get-involved/' | url }}">Get Involved</a>
-  </nav>
+{% block site_nav %}
+  <div class="satyrn-home-nav">{{ super() }}</div>
 {% endblock %}
 
 {% block footer %}

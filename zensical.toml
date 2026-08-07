@@ -27,6 +27,8 @@ site_author = "Satyrn AI Contributors"
 # The site_url is the canonical URL for your site. When building online
 # documentation you should set this.
 # Read more: https://zensical.org/docs/setup/basics/#site_url
+# The trailing slash is load-bearing: the feed and the OpenGraph tags
+# concatenate paths straight onto this, so dropping it yields `satyrn.aifeed.xml`.
 site_url = "https://satyrn.ai/"
 
 # The copyright notice appears in the page footer and can contain an HTML
@@ -46,6 +48,11 @@ copyright = """
 
 docs_dir = "src"
 extra_css = ["stylesheets/satyrn.css"]
+# `feed.xml` is a MiniJinja template, not a page: `extra_templates` renders it
+# with the same `nav` tree the pages get, which is what makes the feed possible
+# without a plugin system.
+extra_templates = ["feed.xml"]
+extra_javascript = ["javascripts/blog-dates.js"]
 # Zensical supports both implicit navigation and explicitly defined navigation.
 # If you decide not to define a navigation here then Zensical will simply
 # derive the navigation structure from the directory structure of your
@@ -228,7 +235,12 @@ features = [
     # When tabs are enabled, top-level sections are rendered in a menu layer
     # below the header for viewports above 1220px, but remain as-is on mobile.
     # https://zensical.org/docs/setup/navigation/#navigation-tabs
-    #"navigation.tabs",
+    #
+    # What goes in the bar is `extra.nav_tabs`, not the whole top level --
+    # overrides/partials/tabs.html replaces the stock loop. This feature flag
+    # still has to be on: it is what renders the bar at all, and what puts
+    # `md-nav--lifted` on the sidebar so the sidebar drops to the current tab.
+    "navigation.tabs",
 
     # When sticky tabs are enabled, navigation tabs will lock below the header
     # and always remain visible when scrolling down.
@@ -259,7 +271,13 @@ features = [
     # When navigation integration for the table of contents is enabled, it is
     # always rendered as part of the navigation sidebar on the left.
     # https://zensical.org/docs/setup/navigation/#navigation-integration
-    #"toc.integrate",
+    #
+    # On with `navigation.tabs`: the tabs carry the top level, so the left
+    # sidebar is free to carry the current page's headings instead. Without
+    # this the headings render twice -- `nav-item.html` nests them under the
+    # active item whether or not this is set, and the right-hand sidebar
+    # repeats them.
+    "toc.integrate",
 ]
 
 # ----------------------------------------------------------------------------
@@ -384,3 +402,89 @@ shadowed_definitions = true
 shadowed_footnotes = true
 unresolved_footnotes = true
 unresolved_references = true
+
+# ----------------------------------------------------------------------------
+# Blog. Zensical ships no blog support and has no plugin system, so everything
+# below is read by the templates in `overrides/`, which walk the `nav` tree and
+# filter on front matter. See docs/BLOG.md for why it works this way.
+# ----------------------------------------------------------------------------
+[project.extra]
+# Matched against rendered page titles character for character, em dash
+# included. A title that does not match is not an error: the item silently
+# drops to the end of the sidebar. Anything absent is appended, not hidden, so
+# a new page never vanishes.
+nav_order = [
+    "Satyrn AI — AI Our Way",
+    "Mission",
+    "Local-First",
+    "Get Involved",
+    "Blog",
+    "Tags",
+    "Authors",
+]
+# Rendered as a single link rather than an expanded tree. Each needs an index
+# page for the link to target, which is what src/tags/index.md and
+# src/authors/index.md are for.
+nav_collapse = ["Authors", "Tags"]
+# Rendered as a link plus its most recent posts, newest first.
+nav_recent = ["Blog"]
+nav_recent_count = 5
+# Kept out of the sidebar and the mobile drawer, except on their own pages,
+# where the item is what gives the page a sidebar at all. Both are reached from
+# the tag chips on a post, the byline, and the blog index -- they are archives,
+# not destinations, and listing them alongside Mission oversells them.
+nav_hide = ["Tags", "Authors"]
+# The default social card, used by every page that does not set `image:` in its
+# front matter. Root-relative and without a leading slash: overrides/main.html
+# concatenates it onto `site_url`, which already ends in one.
+#
+# JPEG rather than WebP or AVIF. The page never loads this -- only the crawlers
+# building link previews do -- and their format support is both narrower and
+# harder to verify than a browser's. Regenerate with `just og-image`.
+og_image = "assets/og-image.jpg"
+
+# The tab bar, in order, rendered by overrides/partials/tabs.html. This is an
+# editorial list, not a mirror of the top level: Tags and Authors are top-level
+# sections and deliberately absent, and a new top-level page does not earn a tab
+# by existing.
+#
+# `page` is the nav item title to match, and defaults to `title` when omitted,
+# so it is only needed where the tab label differs from the page title. A `page`
+# that matches nothing drops the tab silently with a green build -- the same
+# trap as `nav_order` -- which is what `just check-nav` is for.
+[[project.extra.nav_tabs]]
+title = "Home"
+page = "Satyrn AI — AI Our Way"
+
+[[project.extra.nav_tabs]]
+title = "Mission"
+
+[[project.extra.nav_tabs]]
+title = "Local-First"
+
+[[project.extra.nav_tabs]]
+title = "Get Involved"
+
+[[project.extra.nav_tabs]]
+title = "Blog"
+
+# Authors. `name` is the only required key; `title`, `url`, `avatar` and
+# `fediverse` all degrade quietly when absent. A post naming a slug with no
+# table here fails the build, which is the one piece of referential integrity
+# that comes for free.
+#
+# `url` is linked from the byline. `fediverse` only builds a meta tag and is
+# never rendered, and it takes effect only once that account has enabled author
+# attribution in its Mastodon profile.
+#
+# These two are placeholders, on reserved example domains, so the listings and
+# feed have something to render. Replace them with real people before launch.
+[project.extra.authors.example]
+name = "Example Author"
+title = "Maintainer"
+url = "https://example.com"
+fediverse = "@example@mastodon.example"
+
+[project.extra.authors.second-author]
+name = "Second Author"
+url = "https://second.example"

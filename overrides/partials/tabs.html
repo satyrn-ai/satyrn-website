@@ -1,0 +1,44 @@
+{#-
+  The tab bar. Replaces the theme's partial, which loops `nav.items` and so
+  renders every top-level section in whatever order the directory walk produced.
+
+  Here the bar is `extra.nav_tabs` instead: an ordered, editorial list. Each
+  entry still resolves against `nav.items` rather than carrying its own URL, so
+  the link, the trailing slash and the active state all stay the theme's job and
+  cannot drift from where the page actually lives.
+
+  An entry naming a page that does not exist renders nothing and does not fail
+  the build. `just check-nav` compares the built bar against this list.
+-#}
+<nav class="md-tabs" aria-label="{{ lang.t('tabs') }}" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      {%- for tab in config.extra.nav_tabs | d([], true) -%}
+        {%- set wanted = tab.page | d(tab.title, true) -%}
+        {%- set ns = namespace(item=none) -%}
+        {%- for it in nav.items -%}
+          {%- if it.title == wanted and not ns.item %}{% set ns.item = it %}{% endif -%}
+        {%- endfor -%}
+        {%- if ns.item -%}
+          {#- A section has no URL of its own; `navigation.indexes` gives it one
+              by way of the child marked as its index.
+
+              Tested against none rather than for truthiness, which is what the
+              rest of the templates do: the home page's URL is the empty string,
+              so a falsy test reads it as a section and drops the tab. -#}
+          {%- set tns = namespace(target=ns.item.url) -%}
+          {%- if tns.target is none -%}
+            {%- for child in ns.item.children -%}
+              {% if child.is_index and tns.target is none %}{% set tns.target = child.url %}{% endif %}
+            {%- endfor -%}
+          {%- endif -%}
+          {%- if tns.target is not none -%}
+            <li class="md-tabs__item{% if ns.item.active %} md-tabs__item--active{% endif %}">
+              <a href="{{ tns.target | url }}" class="md-tabs__link">{{ tab.title | e }}</a>
+            </li>
+          {%- endif -%}
+        {%- endif -%}
+      {%- endfor -%}
+    </ul>
+  </div>
+</nav>

@@ -81,6 +81,10 @@ html:has(> body[data-md-color-scheme="slate"]) { color-scheme: dark; }
   --satyrn-card-bg: var(--satyrn-card-light);
   --satyrn-border: rgb(28 26 23 / 15%);
   --satyrn-mark-filter: none;
+
+  /* The theme's --md-default-fg-color--light only reaches 4.35:1 on the
+     footer's meta bar (12% ink over cream). One step darker passes at 4.7:1. */
+  --satyrn-copyright: #665a49;
 }
 
 /* `--md-hue` drives every colour the slate scheme derives in HSL — code
@@ -111,6 +115,9 @@ html:has(> body[data-md-color-scheme="slate"]) { color-scheme: dark; }
 
   --satyrn-card-bg: var(--satyrn-card-dark);
   --satyrn-border: rgb(240 230 210 / 15%);
+
+  /* The theme's own value: already 5.6:1 on this scheme's meta bar. */
+  --satyrn-copyright: var(--md-default-fg-color--light);
 
   /* The balloon string is a thin dark stroke with nothing behind it, so on the
      dark background it all but disappears. A soft halo restores it without
@@ -171,37 +178,114 @@ html:has(> body[data-md-color-scheme="slate"]) { color-scheme: dark; }
   display: none;
 }
 
-/* ------------------------------------------------------- block: sections -- */
+/* ------------------------------------------------------------------ tabs -- */
 
-/* Plain links, deliberately not dressed as the theme's nav or tab strip. Those
-   are for site structure; these are three destinations the landing page chooses
-   to point at, and the blog will change what the real nav looks like anyway. */
-.satyrn-sections {
-  display: flex;
-  flex-wrap: wrap;
+/* Plain brand-coloured links on the page background, right-aligned against the
+   content grid, rather than the theme's solid primary bar of white labels.
+
+   The `.md-grid` inside `partials/tabs.html` supplies that 61rem width and
+   centres it, so nothing here needs to restate it. */
+.md-tabs {
+  background-color: var(--md-default-bg-color);
+  color: var(--md-typeset-a-color);
+  box-shadow: none;
+}
+
+.md-tabs__list {
   justify-content: flex-end;
   gap: 0 1.5rem;
-  width: 100%;
-  max-width: 61rem;
-  margin: 0 auto;
-  padding: 0.6rem 0.8rem 0;
+  padding: 0.4rem 0.4rem 0.5rem;
+}
+
+/* The theme sizes items to a 2.4rem bar and spaces them with side padding;
+   the gap above does the spacing here, and the link owns its own height. */
+.md-tabs__item {
+  height: auto;
+  padding: 0;
 }
 
 /* Padded to clear the 24x24px WCAG 2.2 minimum target size; the text alone is
-   about 14px tall. */
-.satyrn-sections__link {
-  display: inline-flex;
+   about 14px tall. The transparent border reserves the rule the active tab
+   gets, so nothing shifts by 2px as you move between tabs. */
+.md-tabs__link {
   align-items: center;
   min-height: 24px;
-  color: var(--md-typeset-a-color);
+  margin-top: 0;
+  padding: 0 0.2rem;
   font-size: 0.8rem;
   font-weight: 600;
-  text-decoration: none;
+  border-bottom: 2px solid transparent;
 }
 
-.satyrn-sections__link:hover {
+/* The theme dims links to 0.7 and lifts them back on hover. Colour carries
+   that job here instead -- but only while the bar is on screen: `[hidden]` is
+   how the theme animates the bar away on scroll, and overriding opacity flat
+   would leave the labels visible through it. */
+.md-tabs:not([hidden]) .md-tabs__link {
+  opacity: 1;
+}
+
+.md-tabs__link:hover,
+.md-tabs__link:focus {
   color: var(--md-accent-fg-color);
   text-decoration: underline;
+}
+
+/* Colour and rule together, not colour alone: at 0.8rem this is the only thing
+   telling you where you are, and WCAG 1.4.1 wants more than hue carrying it.
+   `--active .md-tabs__link` is the theme's own selector for the label, so this
+   has to match it to win rather than sitting on the item. */
+.md-tabs__item--active {
+  border-bottom: none;
+}
+
+.md-tabs__item--active .md-tabs__link {
+  color: var(--md-accent-fg-color);
+  border-bottom-color: var(--md-accent-fg-color);
+}
+
+/* --------------------------------------------------------------- sidebar -- */
+
+/* Above 1220px the theme's `md-nav--lifted` hides every top-level item but the
+   active one, which is exactly the scoping wanted: the tabs carry the top
+   level, so the sidebar carries what is inside the current tab. Below that
+   width the tab bar is not rendered at all and the same markup becomes the
+   drawer, still holding the whole tree. Nothing in the templates has to know
+   which of the two it is producing.
+
+   Lifted goes one step further than wanted, though, and hides the active
+   item's own link as well, leaving a column of headings with nothing naming
+   them. Restoring it gives the sidebar a title. `a.md-nav__link` and not
+   `.md-nav__link`: the theme emits a `<label>` sharing that class to toggle
+   the headings on mobile, and that one should stay hidden. */
+@media screen and (min-width: 76.25em) {
+  .md-nav--lifted > .md-nav__list > .md-nav__item--active > a.md-nav__link {
+    display: block;
+    margin-bottom: 0.4rem;
+    color: var(--md-default-fg-color);
+    font-weight: 700;
+  }
+}
+
+/* The landing page runs full width, so its sidebar is suppressed -- but only
+   above the breakpoint where the tab bar exists to replace it. Below that, the
+   same element is the mobile drawer and the only navigation on the page. See
+   overrides/home.html for why this is a wrapper class and not `hide`. */
+.satyrn-home-nav {
+  display: contents;
+}
+
+@media screen and (min-width: 76.25em) {
+  .satyrn-home-nav > .md-sidebar--primary {
+    display: none;
+  }
+}
+
+/* ----------------------------------------------------------- docs footer -- */
+
+/* Contrast fix; the numbers live with the token in the scheme blocks. */
+.md-copyright {
+  color: var(--satyrn-copyright);
 }
 
 /* ----------------------------------------------------------- block: hero -- */
@@ -378,8 +462,7 @@ html:has(> body[data-md-color-scheme="slate"]) { color-scheme: dark; }
 /* Inline links inside a sentence are exempt from the 24px minimum target size,
    so the base carries only colour and the standalone modifier adds the target
    box. That way an inline link never has to undo it. */
-.satyrn-footer__link--standalone,
-.satyrn-sections__link {
+.satyrn-footer__link--standalone {
   display: inline-flex;
   align-items: center;
   min-height: 24px;
@@ -394,6 +477,118 @@ html:has(> body[data-md-color-scheme="slate"]) { color-scheme: dark; }
   display: inline-block;
   padding-block: 0.25rem;
   text-decoration: underline;
+}
+
+/* --------------------------------------------------------- block: blog -- */
+
+/* Both blog blocks sit inside `.md-typeset`, so their lists arrive with the
+   theme's bullets, indent and item spacing already on. Clearing that is the
+   first thing either of them has to do.
+
+   The `[dir]` prefix is doing real work, and this is the one place in this
+   stylesheet that needed extra specificity. The theme writes its indents as
+   `[dir=ltr] .md-typeset ul li`, which a plain two-class selector loses to.
+   `[dir]` matches either direction and outranks it by one class, and
+   `margin-inline` then replaces the theme's separate ltr and rtl rules with a
+   single declaration. */
+[dir] .md-typeset :is(.satyrn-byline__authors, .satyrn-byline__author,
+                      .satyrn-posts, .satyrn-post) {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Byline. Emitted above the h1 -- the `content` block can only wrap the page's
+   markdown -- so it reads as an eyebrow rather than a caption. */
+.satyrn-byline {
+  margin-bottom: 0.8rem;
+  color: var(--md-default-fg-color--light);
+  font-size: 0.7rem;
+}
+
+/* Inline, not flex. A byline is a sentence, and inline content wraps as one
+   sequence. As flex items the author list and the date wrapped independently,
+   which on two authors put the date in between them.
+
+   Prefixed the same way as the reset above, and for the same reason: the theme
+   writes this one as `.md-typeset ul:not([hidden])`, where the `:not()` counts
+   for as much as a class. Two of our own classes tie and lose; three win. */
+[dir] .md-typeset :is(.satyrn-byline__authors, .satyrn-byline__author) {
+  display: inline;
+}
+
+/* Separators as generated content, so they never survive alone on a wrapped
+   line the way a real character in the markup would. Without them the name and
+   title render as "Example AuthorMaintainer".
+
+   Two distinct marks on purpose: a comma between authors, brackets around a
+   title. One mark for both makes "Example Author, Maintainer" ambiguous
+   between a job title and a second person. */
+.satyrn-byline__author + .satyrn-byline__author::before {
+  content: ", ";
+}
+
+.satyrn-byline__title::before {
+  content: " (";
+}
+
+.satyrn-byline__title::after {
+  content: ")";
+}
+
+.satyrn-byline__date::before {
+  content: "·";
+  margin: 0 0.4rem;
+}
+
+/* Pinned in CSS rather than by width/height attributes, because an author's
+   avatar file is not this stylesheet's to measure. `aspect-ratio` with `cover`
+   crops a non-square file instead of distorting it. */
+.satyrn-byline__avatar {
+  width: 1.5rem;
+  aspect-ratio: 1;
+  margin-right: 0.3rem;
+  border-radius: 50%;
+  object-fit: cover;
+  vertical-align: middle;
+}
+
+/* Listings, shared by the blog index and every author and tag archive. The
+   selector matches the reset above so the margin here is not undone by it. */
+[dir] .md-typeset .satyrn-posts {
+  display: grid;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+/* Beats `.md-typeset h2`, which sets a top margin sized for a heading that
+   separates sections of prose. Here the heading opens a row. */
+.md-typeset .satyrn-post__title {
+  margin: 0 0 0.4rem;
+  font-size: 1.1rem;
+}
+
+/* The whole row is not a link, so the title carries the affordance on its own
+   and needs the underline that a standalone nav link can do without. */
+.satyrn-post__title a {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.md-typeset .satyrn-post__meta {
+  margin: 0;
+  color: var(--md-default-fg-color--light);
+  font-size: 0.7rem;
+}
+
+.satyrn-post__author::before {
+  content: "·";
+  margin: 0 0.4rem;
+}
+
+.md-typeset .satyrn-post__summary {
+  margin: 0.4rem 0 0;
+  text-wrap: pretty;
 }
 
 /* ------------------------------------------------------- shared typeset -- */
@@ -423,21 +618,24 @@ html:has(> body[data-md-color-scheme="slate"]) { color-scheme: dark; }
   text-wrap: pretty;
 }
 
-/* Hand-written links, shared by the section nav and the footer. Keeping the
-   focus ring here means a third block cannot pick up the colour and silently
-   miss the ring. */
-.satyrn-sections__link,
+/* Hand-written links. Keeping the focus ring here means a second block cannot
+   pick up the colour and silently miss the ring. */
 .satyrn-footer__link {
   color: var(--md-typeset-a-color);
 }
 
-.satyrn-sections__link:hover,
 .satyrn-footer__link:hover {
   color: var(--md-accent-fg-color);
 }
 
-.satyrn-sections__link:focus-visible,
-.satyrn-footer__link:focus-visible {
+/* The tab and blog links take the ring but not the colour above: theirs comes
+   from `.md-tabs` and `.md-typeset a`, and `currentcolor` picks it up either
+   way. Every one of those colours clears the 3:1 WCAG 1.4.11 asks of a focus
+   indicator -- 4.67:1 on cream, 9.46:1 on ink. */
+.md-tabs__link:focus-visible,
+.satyrn-footer__link:focus-visible,
+.satyrn-byline__link:focus-visible,
+.satyrn-post__title a:focus-visible {
   outline: 2px solid currentcolor;
   outline-offset: 2px;
   border-radius: 2px;

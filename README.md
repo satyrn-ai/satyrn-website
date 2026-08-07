@@ -13,6 +13,12 @@ Every recipe shells out to `uv`,
 which handles Python and Zensical for you,
 so there's nothing else to install and no virtualenv to activate.
 
+Two checks reach further:
+`just lint` needs node, and `just check-a11y` needs node plus a Chrome
+or Chromium.
+Both fail with a message saying so rather than silently,
+and GitHub runners have all of it preinstalled.
+
 ## Using it
 
 `just` on its own lists every command:
@@ -30,6 +36,8 @@ and `just serve` reloads as you save.
 
 Not a `just` user?
 The commands underneath are `uv run zensical serve` and `uv run zensical build --strict`.
+`just serve` additionally points `site_url` at localhost first,
+without which instant navigation degrades to full page loads locally.
 
 ## How it gets deployed
 
