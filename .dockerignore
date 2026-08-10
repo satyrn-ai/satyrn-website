@@ -1,0 +1,9 @@
+.git
+.github
+.vscode
+site
+.cache
+.venv
+.zensical.serve.toml
+Dockerfile
+.dockerignore
