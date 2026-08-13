@@ -171,22 +171,26 @@ meaningful.**
 
 ## Outstanding before launch
 
-1. **The example posts and authors are placeholders.** Each carries a "Still
-   being written" admonition and the authors sit on reserved example domains.
-   Replace them, or drop the commit that added them.
-2. **`navigation.footer` and `nav_order` disagree.** The previous/next links
-   come from the directory-derived tree, which the sidebar reordering does not
-   touch, so a post's "Next" can be `Tags`. That is sharper now that `nav_hide`
-   keeps Tags and Authors out of the tabs and the sidebar, leaving the footer as
-   the only chrome pointing at them. Fixing it means shadowing one more partial;
-   turning off `navigation.footer` avoids it entirely.
-3. **Each author must enable attribution on Mastodon** (Preferences → Public
+1. **Each author must enable attribution on Mastodon** (Preferences → Public
    Profile → Verification → Author Attribution, adding this domain). Until then
    `fediverse:creator` has no visible effect, and it only applies to links shared
    afterward. There is also a reported Mastodon issue where the tag suppresses
    the site description in preview cards
    ([mastodon#32758](https://github.com/mastodon/mastodon/issues/32758)).
-Both are content and account decisions rather than code.
+
+An account decision rather than a code one, and it can wait for a real author.
+
+The blog currently has no posts, which shows in two places until the first one
+lands: `/blog/` renders its introduction with nothing beneath it, and the feed's
+`<updated>` falls back to `1970-01-01T00:00:00Z` because it is the newest post
+date and there is none. Both correct themselves on the first post; neither is
+worth an empty-state branch in the templates for the days in between.
+
+Two entries came off this list rather than being deferred. The example posts and
+authors were reverted whole, in the commit shaped to allow it. And the
+previous/next links pointing at `Tags` are fixed in
+`overrides/partials/footer.html`, which filters both directions on `nav_hide`
+rather than turning `navigation.footer` off.
 
 `site_url` used to be a fourth entry here, because `navigation.instant` fetches
 `sitemap.xml` from the absolute URL and the browser refuses that request
