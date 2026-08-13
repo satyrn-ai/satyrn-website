@@ -68,7 +68,9 @@ That is the good case: it is loud rather than silent.
 Navigation comes from the directory tree.
 There's no `nav` list in `zensical.toml` on purpose:
 the blog reads that same tree to build its listings and feed,
-and an explicit list empties them without saying so.
+so a post the tree doesn't reach is a post they can't see.
+A hand-written list would have to name every post to stay correct,
+and says nothing when it stops doing so.
 
 ## Things that fail quietly
 
@@ -312,7 +314,9 @@ Drop it unconditionally and the page loses its own navigation.
 
 There is deliberately no `nav` list in `zensical.toml`.
 The blog reads the same derived tree for its listings and feed,
-and an explicit list empties them with no warning.
+so the tree has to reach every post; deriving it guarantees that,
+where a hand-written list only promises it.
+See "Rules that break things silently" in `docs/BLOG.md` for what that costs.
 
 The pillar cards use the theme's own `grid cards`:
 a markdown list inside `<div class="grid cards satyrn-pillars" markdown>`,

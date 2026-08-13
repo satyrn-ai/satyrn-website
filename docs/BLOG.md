@@ -27,11 +27,23 @@ compatible, `define_env` in a root `main.py`). It is deliberately unused — see
 These caused real failures during implementation. Each fails without an error,
 or with an error that points somewhere unhelpful.
 
-**Never add a top-level `nav` key to `zensical.toml`.** It removes posts from
-`nav.items` entirely, which empties the feed and every listing. The posts still
-build and remain reachable by URL, so nothing looks broken. Navigation must stay
-directory-derived. (`nav_order` and friends under `[project.extra]` are unrelated
-custom keys and are fine.)
+**The `nav` tree has to contain every post.** Zensical is perfectly happy with a
+top-level `nav` key in `zensical.toml`; this is a constraint of the
+implementation above, not of Zensical. Because the templates read `nav` as the
+post database, a post the tree does not reach is a post the listings and the
+feed cannot see.
+
+Leaving navigation directory-derived satisfies that by construction, which is
+why there is no `nav` list. Adding one satisfies it only for as long as somebody
+keeps it in step, and the failure is silent: with a three-entry `nav` the feed
+drops from three entries to none, the blog index stops being built at all, and
+all three posts still build and stay reachable by URL, with `--strict` reporting
+success throughout.
+
+So an explicit `nav` is a maintenance question rather than a prohibition. It
+would need every post listed in it, and something in `just ci` to fail when one
+is missing, before it could be relied on. (`nav_order` and friends under
+`[project.extra]` are unrelated custom keys and are fine.)
 
 Related, and equally silent: a directory reference (`{ "Blog" = "blog" }`), a
 glob (`"blog/2026/*.md"`), and a directory nested in a list all expand to
