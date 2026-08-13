@@ -33,10 +33,10 @@ so `--strict` cannot see it and something else has to.
 | `src/authors/`, `src/tags/` | An index page plus one page per author and per tag. |
 | `src/feed.xml` | The Atom feed, rendered as a template rather than a page. |
 | `src/stylesheets/satyrn.css` | Brand palette, landing page layout, blog styling. |
-| `src/assets/` | Logos, mascot artwork, favicon. |
+| `src/assets/` | Logos, mascot artwork, favicon, and the generated social card. |
 | `overrides/main.html` | Head additions, link previews and the listing block, applied to every page. |
 | `overrides/home.html` | The landing page shell: its own footer, and the wrapper that keeps its sidebar to the mobile drawer. |
-| `overrides/partials/` | Shadowed theme partials plus the blog's byline and listing rows. |
+| `overrides/partials/` | The chrome, shadowed from the theme — `tabs.html`, `nav.html`, `footer.html` — plus the blog's own `post-byline.html`, `post-item.html` and `tags.html`. |
 | `justfile` | Every command. `just` with no argument lists them. |
 
 `docs/BLOG.md` covers the blog's implementation:
@@ -246,8 +246,8 @@ the chip still renders as a live link to a dead URL.
 Without it the listing row and the feed entry both come out empty.
 
 An `image:` key overrides the link preview image for that post.
-There is no site-wide default yet;
-see the note on `og_image` in `zensical.toml`.
+Without one the post falls back to the site-wide card at `extra.og_image`,
+which `just og-image` builds.
 
 ### Adding a blog author
 
@@ -288,7 +288,7 @@ and one media query hides it above the same width the tab bar appears at.
 
 ### Navigation
 
-Two things carry it, and they are configured separately.
+Three things carry it, and they are configured separately.
 
 The tab bar is `[[project.extra.nav_tabs]]`,
 rendered by `overrides/partials/tabs.html`.
@@ -311,6 +311,15 @@ when the item is the page you are on:
 on desktop lifted has already hidden it everywhere else,
 so the only thing `nav_hide` really removes is a drawer entry.
 Drop it unconditionally and the page loses its own navigation.
+
+The previous/next links are `overrides/partials/footer.html`.
+The theme builds them from the directory tree in document order,
+which knows nothing about `nav_order` or `nav_hide`,
+so the override filters out anything inside a hidden section —
+in both directions, so those sections neither appear as a destination
+nor offer links back out of themselves.
+`nav_hide` is what all three read,
+so adding a section to it removes it from the chrome everywhere at once.
 
 There is deliberately no `nav` list in `zensical.toml`.
 The blog reads the same derived tree for its listings and feed,
