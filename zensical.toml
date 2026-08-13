@@ -477,14 +477,6 @@ title = "Blog"
 # never rendered, and it takes effect only once that account has enabled author
 # attribution in its Mastodon profile.
 #
-# These two are placeholders, on reserved example domains, so the listings and
-# feed have something to render. Replace them with real people before launch.
-[project.extra.authors.example]
-name = "Example Author"
-title = "Maintainer"
-url = "https://example.com"
-fediverse = "@example@mastodon.example"
-
-[project.extra.authors.second-author]
-name = "Second Author"
-url = "https://second.example"
+# There are none yet. `src/authors/<slug>.md` and a table here are both needed
+# before a post can name that slug; see "Adding a blog author" in
+# CONTRIBUTING.md.
