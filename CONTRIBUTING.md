@@ -200,7 +200,7 @@ Body text indents four spaces.
 
 ## Writing a blog post
 
-A post is a markdown file at `src/blog/<year>/<slug>.md`:
+A post is a markdown file at `src/blog/<year>/<slug>.md` with the following front matter in `yaml` format:
 
 ```yaml
 ---
@@ -213,6 +213,10 @@ tags:
 description: One sentence. It carries the listing row, the link preview and the feed.
 ---
 ```
+
+Your post's content is written in Markdown.
+
+### Frontmatter notes
 
 Lists go one item per line, not `[example]`.
 `unresolved_references` validation reads a flow sequence as a markdown
@@ -243,9 +247,15 @@ An `image:` key overrides the link preview image for that post.
 There is no site-wide default yet;
 see the note on `og_image` in `zensical.toml`.
 
-Adding an author means both a `[project.extra.authors.<slug>]` table
-and a `src/authors/<slug>.md` page.
-Adding a tag means a `src/tags/<tag>.md` page.
+### Adding a blog author
+
+To add an author, two files must be edited:
+
+- `zensical.toml` needs an entry for the author in the `[project.extra.authors.<slug>]` table
+- `src/authors/<slug>.md`
+
+### Blog and author indexes
+
 Neither directory's `index.md` is decorative:
 the sidebar collapses each section onto its index,
 and a section without one renders expanded instead.
