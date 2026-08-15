@@ -502,6 +502,17 @@ title = "Blog"
 # never rendered, and it takes effect only once that account has enabled author
 # attribution in its Mastodon profile.
 #
-# There are none yet. `src/authors/<slug>.md` and a table here are both needed
-# before a post can name that slug; see "Adding a blog author" in
-# CONTRIBUTING.md.
+# Placeholders, paired with src/authors/example.md and src/authors/
+# second-author.md -- see "Adding a blog author" in CONTRIBUTING.md. Replace
+# with real contributors before launch.
+[project.extra.authors.example]
+name = "Example Author"
+title = "Placeholder"
+url = "https://example.com"
+fediverse = "@example@example.com"
+
+# Deliberately sparse -- no title or fediverse handle -- so the byline has a
+# case to show what an author without either looks like.
+[project.extra.authors.second-author]
+name = "Second Author"
+url = "https://example.com"
