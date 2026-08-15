@@ -33,7 +33,7 @@ jobs:
           cache-python: true
 
       # `just` ships on PyPI as rust-just, so uv is the only prerequisite CI
-      # needs — the same two tools the README asks a contributor to install.
+      # needs — the same one tool the README asks a contributor to install.
       # uvx runs it straight from the cache restored above, without a separate
       # install step.
       - name: Run checks

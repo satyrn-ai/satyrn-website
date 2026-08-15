@@ -1,7 +1,8 @@
 # Satyrn AI website task runner.
 #
-# Everything here runs through `uv`, so `just` and `uv` are the only two things
-# you need installed. Run `just` on its own to see what is available.
+# Everything here runs through `uv`, and `just` itself is a dev dependency
+# (rust-just, same as CI), so `uv` is the only thing you need installed --
+# run `uv run just` on its own to see what is available.
 
 # Show available commands. Hidden so it does not list itself.
 [private]

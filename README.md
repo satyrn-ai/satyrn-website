@@ -7,11 +7,13 @@ so what ships is plain HTML, CSS and a little JavaScript.
 
 ## What you need
 
-Two tools:
-[`uv`](https://docs.astral.sh/uv/) and [`just`](https://just.systems).
-Every recipe shells out to `uv`,
-which handles Python and Zensical for you,
-so there's nothing else to install and no virtualenv to activate.
+Just [`uv`](https://docs.astral.sh/uv/).
+[`just`](https://just.systems) itself ships as a dev dependency
+(`rust-just` on PyPI, the same package CI installs),
+so `uv sync` pulls it in with everything else --
+nothing extra to install, no virtualenv to activate.
+`uv run just` runs it;
+install `just` separately, or activate the venv, and the bare `just` works too.
 
 Two checks reach further:
 `just lint` needs node, and `just check-a11y` needs node plus a Chrome
@@ -21,13 +23,13 @@ and GitHub runners have all of it preinstalled.
 
 ## Using it
 
-`just` on its own lists every command:
+`uv run just` on its own lists every command:
 
 ```bash
-just          # show the commands
-just serve    # dev server with live reload on http://localhost:8000
-just build    # production build into ./site
-just ci       # everything CI runs
+uv run just          # show the commands
+uv run just serve    # dev server with live reload on http://localhost:8000
+uv run just build    # production build into ./site
+uv run just ci       # everything CI runs
 ```
 
 Writing a page means adding a markdown file under `src/`.
@@ -44,14 +46,14 @@ without which instant navigation degrades to full page loads locally.
 Run the app in the container instead:
 
 ```bash
-just docker-serve
+uv run just docker-serve
 ```
 
 runs the dev server in a container instead, still with live reload at
 `http://localhost:8000`, since the repo is bind-mounted in.
 
 
-Not a `just` user either? The commands underneath:
+The commands underneath:
 
 ```
 docker build -t satyrn-website-dev .

@@ -5,7 +5,7 @@ that isn't visible in the code.
 A few of them fail silently,
 so it's worth a skim before your first change.
 
-Run `just ci` before opening a pull request.
+Run `uv run just ci` before opening a pull request.
 CI runs the same recipe:
 a strict build, a front-matter check, a navigation check, the blog checks,
 an asset-reference check, an accessibility check of every built page,
