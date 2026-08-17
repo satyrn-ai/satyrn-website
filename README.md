@@ -43,7 +43,7 @@ uv run just docker-serve
 ```
 
 runs the dev server in a container instead, still with live reload at
-`http://localhost:8000`, since the repo is bind-mounted in.
+<http://localhost:8000>, since the repo is bind-mounted in.
 
 
 The commands underneath:
