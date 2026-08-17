@@ -52,7 +52,7 @@ _dev-config addr:
 # Run the dev server in Docker instead, with live reload at http://localhost:8000
 docker-serve:
     docker build -t satyrn-website-dev .
-    docker run --rm -p 8000:8000 -v "$(pwd)":/app satyrn-website-dev
+    docker run --rm -it -p 8000:8000 -v "$(pwd)":/app satyrn-website-dev
 
 # Build the production site into ./site
 build:
