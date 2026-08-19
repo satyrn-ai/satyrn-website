@@ -50,7 +50,7 @@ The commands underneath:
 
 ```
 docker build -t satyrn-website-dev .
-docker run --rm -p 8000:8000 -v "$(pwd)":/app satyrn-website-dev
+docker run --rm -it -p 8000:8000 -v "$(pwd)":/app satyrn-website-dev
 ```
 
 It's dev-only, and this image isn't what ships to production.
