@@ -27,6 +27,36 @@
 {% endblock %}
 
 {#-
+  Load the theme's own CSS into a `theme` cascade layer. Unlayered styles beat
+  layered ones regardless of specificity, so everything in stylesheets/satyrn.css
+  (unlayered) now wins over the theme's bare-element rules (`.md-typeset a`,
+  tables, headings...) WITHOUT out-specifying them. That ends the specificity
+  chase: component styles can be plain, low-specificity class selectors.
+
+  A `<link>` cannot be layered, so the theme sheets are pulled in via
+  `@import ... layer(theme)`. The hashed filenames mirror base.html's; if the
+  theme is upgraded and the hashes change, this block must be updated with it.
+-#}
+{% block styles %}
+  <style>@layer theme;</style>
+  {% if config.theme.variant == "modern" %}
+    {% set href = 'assets/stylesheets/modern/main.62c9b9cc.min.css' | url %}
+  {% else %}
+    {% set href = 'assets/stylesheets/classic/main.f62f0af6.min.css' | url %}
+  {% endif %}
+  <style>@import url("{{ href }}") layer(theme);</style>
+  {% if config.theme.palette %}
+    {% if config.theme.variant == "modern" %}
+      {% set href = 'assets/stylesheets/modern/palette.dfe2e883.min.css' | url %}
+    {% else %}
+      {% set href = 'assets/stylesheets/classic/palette.7dc9a0ad.min.css' | url %}
+    {% endif %}
+    <style>@import url("{{ href }}") layer(theme);</style>
+  {% endif %}
+  {% include "partials/icons.html" %}
+{% endblock %}
+
+{#-
   Replaces the theme's font block rather than appending to it, so the two
   Google families (text + code) arrive in ONE render-blocking request.
 

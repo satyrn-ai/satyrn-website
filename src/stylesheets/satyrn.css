@@ -600,7 +600,7 @@ html:has(> body[data-md-color-scheme="slate"]) { color-scheme: dark; }
 
 /* ------------------------------------------------------------- CTA button --
    The theme paints every `.md-typeset a` yellow at specificity (0,1,1). We beat
-   it with ONE selector a single notch higher -- `.md-typeset a.satyrn-cta` at
+   it with ONE selector a single notch higher -- `.satyrn-cta` at
    (0,2,1). Not a specificity war, just enough to win deterministically in every
    browser (the `@scope`-proximity approach did NOT: the scoped selector's
    specificity is too low, so the theme won -- and headless Chrome hid it). The
@@ -609,7 +609,7 @@ html:has(> body[data-md-color-scheme="slate"]) { color-scheme: dark; }
    The blog-H1 analogy: a filled face with an offset OUTLINE echo (a hollow
    border, not a solid shadow) down-right; the button presses onto it on hover.
    White on blue-mid is 4.68:1 -- accessible, and no yellow anywhere. */
-.md-typeset a.satyrn-cta {
+.satyrn-cta {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -627,7 +627,7 @@ html:has(> body[data-md-color-scheme="slate"]) { color-scheme: dark; }
 
 /* z-index:-1 with no stacking context on the link puts the echo BEHIND the
    fill, so only the offset corner peeks out down-right. */
-.md-typeset a.satyrn-cta::after {
+.satyrn-cta::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -637,12 +637,12 @@ html:has(> body[data-md-color-scheme="slate"]) { color-scheme: dark; }
   transform: translate(4px, 4px);
 }
 
-.md-typeset a.satyrn-cta:hover {
+.satyrn-cta:hover {
   transform: translate(4px, 4px);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .md-typeset a.satyrn-cta {
+  .satyrn-cta {
     transition: none;
   }
 }
