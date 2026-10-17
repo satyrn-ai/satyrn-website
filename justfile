@@ -336,8 +336,13 @@ lint:
     command -v npx >/dev/null || {
       echo "lint needs npx (ships with node). GitHub runners have it preinstalled;"
       echo "locally, install node or skip this recipe."; exit 1; }
-    npx -y markdownlint-cli2@0.23.2 "src/**/*.md" "*.md"
-    npx -y cspell@10.0.1 --no-progress --no-summary "src/**/*.md" "*.md"
+    # Tracked files only, so a local untracked note never fails the run and CI
+    # and a checkout lint the same set.
+    files=()
+    while IFS= read -r -d '' f; do files+=("$f"); done \
+      < <(git ls-files -z -- ':(glob)src/**/*.md' ':(glob)*.md')
+    npx -y markdownlint-cli2@0.23.2 "${files[@]}"
+    npx -y cspell@10.0.1 --no-progress --no-summary "${files[@]}"
 
 # Report what one visit to the landing page actually downloads
 weigh: build
