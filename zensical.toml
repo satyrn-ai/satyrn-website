@@ -51,7 +51,7 @@ extra_css = ["stylesheets/satyrn.css"]
 # space.js is the hero's pointer parallax and crew.js the contributor carousel.
 # Both return at once on any page without their element, so loading them
 # site-wide costs two small, cached requests.
-extra_javascript = ["javascripts/blog-dates.js", "javascripts/space.js", "javascripts/crew.js", "javascripts/external-links.js"]
+extra_javascript = ["javascripts/space.js", "javascripts/crew.js", "javascripts/external-links.js"]
 # Zensical supports both implicit navigation and explicitly defined navigation.
 # If you decide not to define a navigation here then Zensical will simply
 # derive the navigation structure from the directory structure of your

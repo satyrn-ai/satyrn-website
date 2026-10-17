@@ -1,0 +1,29 @@
+{#-
+  Zensical's stock `content.html`, plus the post byline and the layered title.
+  `blog-post.html` overrides the `content` block, so the byline cannot be put
+  in a block of our own; this partial is the one place that sits above the h1.
+
+  `page.authors` is set on posts only, so every other page renders exactly as
+  the stock file does. A post's h1 is always ours, carrying its own text in
+  `data-title` for the stylesheet to layer, and a leading h1 in the markdown is
+  dropped so there is never a second one.
+-#}
+{% include "partials/actions.html" %}
+{% if page.authors %}
+  {% include "partials/post-byline.html" %}
+  <h1 data-title="{{ page.title | e }}">{{ page.title | e }}</h1>
+  {% set body = page.content %}
+  {% if (body | trim)[:3] == "<h1" %}
+    {% set body = body | trim | split("</h1>", 1) | last %}
+  {% endif %}
+  {{ body }}
+{% else %}
+  {% if "<h1" not in page.content %}
+    <h1>{{ page.title | d(config.site_name, true)}}</h1>
+  {% endif %}
+  {{ page.content }}
+{% endif %}
+{% include "partials/tags.html" %}
+{% include "partials/source-file.html" %}
+{% include "partials/feedback.html" %}
+{% include "partials/comments.html" %}
