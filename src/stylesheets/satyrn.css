@@ -45,11 +45,11 @@ html:has(> body[data-md-color-scheme="slate"]) { color-scheme: dark; }
    smear this display face. The vendor's internal name records are stripped, so
    the family name below is one we assign; nothing does a `local()` lookup.
 
-   Only "Triple Charm Sans" is rendered today (headings, below). The outline and
-   script faces are declared so they are ready to use -- an unreferenced
-   @font-face costs nothing, the file is fetched only when something is actually
-   painted in it -- and wired to tokens for when the site adopts them:
-   outline for special display text, script for human names and flourishes. */
+   All three faces are rendered. The sans sets headings through
+   `--satyrn-font-display`. The outline draws the offset echo behind a post's
+   title through `--satyrn-font-outline`. The script sets author names through
+   `--satyrn-font-author`, which points at `--satyrn-font-script`. A browser
+   fetches each file only on a page that paints text in that face. */
 @font-face {
   font-family: "Triple Charm Sans";
   src: url("../assets/fonts/triplecharm-sans-webfont.woff2") format("woff2"),
@@ -98,10 +98,13 @@ html:has(> body[data-md-color-scheme="slate"]) { color-scheme: dark; }
      its file loads or if it ever fails to. */
   --satyrn-font-display: "Triple Charm Sans", var(--md-text-font, "Reddit Sans"), sans-serif;
 
-  /* Not yet rendered anywhere -- see the @font-face note above. Kept as tokens
-     so their first use is a one-line reference, not a font-stack decision. */
+  /* The outline draws the post-title echo; the script is for human names. */
   --satyrn-font-outline: "Triple Charm Outline", var(--md-text-font, "Reddit Sans"), sans-serif;
   --satyrn-font-script: "Triple Charm Script", cursive;
+
+  /* Every author name, wherever it appears: byline, listing, sidebar profile
+     and landing card. One token so the face can change in one place. */
+  --satyrn-font-author: var(--satyrn-font-script);
 
   /* Theme backgrounds. */
   --satyrn-greige: #efe4d2;
@@ -1740,9 +1743,9 @@ html:has(.satyrn-hero) {
 
 /* -------------------------------------------------------- block: latest -- */
 
-/* Latest posts at the foot of the landing page, from partials/home-blog.html.
-   Rendered outside the markdown but still inside `.md-typeset`, so its lists
-   need the same reset as the blog listings. */
+/* Latest posts at the foot of the landing page, built by the macros in
+   `main.py` and called from `src/index.md`. Inside `.md-typeset`, so its list
+   needs the same reset as the byline's. */
 .satyrn-latest__head {
   display: flex;
   flex-wrap: wrap;
@@ -1845,7 +1848,7 @@ html:has(.satyrn-hero) {
 .md-typeset .satyrn-card__byline {
   margin: auto 0 0;
   color: var(--md-default-fg-color);
-  font-family: var(--satyrn-font-script);
+  font-family: var(--satyrn-font-author);
   font-size: 1.7rem;
   font-weight: normal;
   letter-spacing: normal;
@@ -2006,9 +2009,18 @@ html:has(.satyrn-hero) {
 
 /* --------------------------------------------------------- block: blog -- */
 
-/* Both blog blocks sit inside `.md-typeset`, so their lists arrive with the
-   theme's bullets, indent and item spacing already on. Clearing that is the
-   first thing either of them has to do.
+/* Two halves. Our byline, hand-written in partials/post-byline.html, and the
+   markup Zensical's blog plugin emits for listings, post sidebars, tags and
+   pagination. The second half names tokens, Zensical's classes and one hook of
+   ours, `.satyrn-post-author` from partials/post.html, so it moves to a shared
+   theme together with that partial.
+
+   Underlines and focus rings for every blog link come from the shared
+   link-underline and focus lists near the end of the file, not from here.
+   Move this section and those lists together. */
+
+/* The byline sits inside `.md-typeset`, so its list arrives with the theme's
+   bullets, indent and item spacing already on.
 
    The `[dir]` prefix is doing real work, and this is the one place in this
    stylesheet that needed extra specificity. The theme writes its indents as
@@ -2016,8 +2028,7 @@ html:has(.satyrn-hero) {
    `[dir]` matches either direction and outranks it by one class, and
    `margin-inline` then replaces the theme's separate ltr and rtl rules with a
    single declaration. */
-[dir] .md-typeset :is(.satyrn-byline__authors, .satyrn-byline__author,
-                      .satyrn-posts, .satyrn-post) {
+[dir] .md-typeset :is(.satyrn-byline__authors, .satyrn-byline__author) {
   margin: 0;
   padding: 0;
   list-style: none;
@@ -2031,21 +2042,14 @@ html:has(.satyrn-hero) {
   font-size: var(--fs-xs);
 }
 
-/* The author name gets the script face -- the one place human names are
-   handwritten. Sized well above the 0.7rem eyebrow so the joined glyphs stay
-   legible, with the date and title left small around it. Covers both the linked
-   name and the plain-text fallback; the only other child span is the title,
-   excluded here. Tracking cleared because script glyphs are joined. */
-.satyrn-byline__author > a,
-.satyrn-byline__author > span:not(.satyrn-byline__title) {
-  font-family: var(--satyrn-font-script);
+/* The author name gets the handwritten face. Sized well above the 0.7rem
+   eyebrow so the joined glyphs stay legible, with the date left small beside
+   it. Tracking cleared because script glyphs are joined. */
+.satyrn-byline__link {
+  font-family: var(--satyrn-font-author);
   font-size: 1.5rem;
   letter-spacing: normal;
 }
-
-/* The byline author link takes the shared border-bottom underline. That
-   technique is exactly why the shared rule uses a border and not a
-   text-decoration: it sits clear of this script face's descenders. */
 
 /* Inline, not flex. A byline is a sentence, and inline content wraps as one
    sequence. As flex items the author list and the date wrapped independently,
@@ -2059,22 +2063,9 @@ html:has(.satyrn-hero) {
 }
 
 /* Separators as generated content, so they never survive alone on a wrapped
-   line the way a real character in the markup would. Without them the name and
-   title render as "Example AuthorMaintainer".
-
-   Two distinct marks on purpose: a comma between authors, brackets around a
-   title. One mark for both makes "Example Author, Maintainer" ambiguous
-   between a job title and a second person. */
+   line the way a real character in the markup would. */
 .satyrn-byline__author + .satyrn-byline__author::before {
   content: ", ";
-}
-
-.satyrn-byline__title::before {
-  content: " (";
-}
-
-.satyrn-byline__title::after {
-  content: ")";
 }
 
 .satyrn-byline__date::before {
@@ -2094,46 +2085,118 @@ html:has(.satyrn-hero) {
   vertical-align: middle;
 }
 
-/* Listings, shared by the blog index and every author and tag archive. The
-   selector matches the reset above so the margin here is not undone by it. */
-[dir] .md-typeset .satyrn-posts {
-  display: grid;
-  gap: 2rem;
-  margin-top: 2rem;
+/* Listing rows, shared by the blog index and every author, category and
+   archive page. The header holds every avatar, then every name, then the
+   meta line. The theme's 0.2rem gap is sized for avatars alone; a script name
+   beside one needs more air. On a phone the header wraps, so the meta line
+   drops below the name instead of squeezing it onto two lines. */
+.md-post--excerpt .md-post__header {
+  flex-wrap: wrap;
+  row-gap: 0;
+  margin-bottom: 0.5rem;
 }
 
-/* Beats `.md-typeset h2`, which sets a top margin sized for a heading that
-   separates sections of prose. Here the heading opens a row. */
-.md-typeset .satyrn-post__title {
-  margin: 0 0 0.4rem;
-  font-size: 1.1rem;
+.md-post--excerpt .md-post__authors {
+  gap: 0.5rem;
 }
 
-/* The whole row is not a link, so the title carries the affordance on its own:
-   it takes the shared link-underline rule. */
+/* `.satyrn-post-author` is our hook on the listing name (partials/post.html).
+   Same face and treatment as the byline, a step smaller to suit the row. */
+.md-post__authors .satyrn-post-author {
+  font-family: var(--satyrn-font-author);
+  font-size: 1.3rem;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: normal;
+  white-space: nowrap;
+}
 
-.md-typeset .satyrn-post__meta {
-  margin: 0;
-  color: var(--md-default-fg-color--light);
+.satyrn-post-author + .satyrn-post-author::before {
+  content: ", ";
+}
+
+/* The meta line moves onto the type scale's small tier, like the byline. The
+   category link stands alone in it rather than inside a sentence, so it is
+   held to the 24px target. */
+.md-meta {
   font-size: var(--fs-xs);
 }
 
-.md-typeset .satyrn-post__author {
-  font-family: var(--satyrn-font-script);
+/* Zensical places the meta list outside `.md-typeset`, but anywhere it lands
+   inside one -- the specimen on /design/typography/ -- the theme's list
+   bullets, indents and display come back. Same `[dir]` reset as the byline's. */
+[dir] .md-typeset :is(.md-meta__list, .md-meta__item) {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+[dir] .md-typeset .md-meta__list {
+  display: inline-flex;
+}
+
+.md-meta__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+}
+
+/* The row's title is the post's first h2. At the prose size it shouted over
+   the rows around it; one tier down binds it to its excerpt. */
+.md-post--excerpt .md-post__content > h2:first-child {
+  font-size: var(--fs-xl);
+}
+
+/* Post sidebar profile. The theme sets the name in a `strong`, which would ask
+   the script face for a bold it does not have, so the weight goes back to 400.
+   The theme's own selectors carry three classes; these match them and win on
+   source order. */
+.md-sidebar.md-sidebar--post .md-profile__description {
+  font-size: var(--fs-xs);
+}
+
+.md-sidebar.md-sidebar--post .md-profile__description strong {
+  font-family: var(--satyrn-font-author);
   font-size: 1.3rem;
+  font-weight: 400;
+  line-height: 1.2;
   letter-spacing: normal;
 }
 
-.satyrn-post__author::before {
-  content: "·";
-  margin: 0 0.4rem;
-  font-family: var(--md-text-font);
-  font-size: var(--fs-xs);
+/* Tags on post pages and the tags index. The body face is set explicitly
+   because the index puts each chip inside an h2, where it would otherwise
+   inherit the display face and a faux-bold 700 from the theme, and the
+   heading's `font-size-adjust`, which scales Lora by the display face's
+   x-height. The theme's linked chip carries `[href]` in both its colour and
+   hover rules, so ours do too; `:is()` takes the heavier of its two arguments
+   for both. Its `outline: none` is answered by the shared focus ring further
+   down. */
+.md-typeset :is(.md-tag, .md-tag[href]) {
+  border: 1px solid var(--satyrn-border-strong);
+  background-color: transparent;
+  color: var(--satyrn-accent-text);
+  font-family: var(--md-text-font, "Reddit Sans"), sans-serif;
+  font-size: 0.7rem;
+  font-size-adjust: none;
 }
 
-.md-typeset .satyrn-post__summary {
-  margin: 0.4rem 0 0;
-  text-wrap: pretty;
+.md-typeset .md-tag[href]:hover {
+  border-color: var(--satyrn-accent);
+  background-color: var(--md-accent-fg-color--transparent);
+  color: var(--satyrn-accent-text);
+}
+
+/* Pagination. The theme's 1.8rem boxes clear the 24px target already. Its
+   hover colour is the UI yellow, which fails at this small size, so hover and
+   the current page take the text tier and the surface instead. */
+.md-pagination__link:hover,
+.md-pagination__link:hover svg {
+  color: var(--satyrn-accent-text);
+}
+
+.md-pagination__current {
+  color: var(--md-default-fg-color);
+  background-color: var(--satyrn-surface);
 }
 
 /* ------------------------------------------------------- shared typeset -- */
@@ -2258,9 +2321,8 @@ html:has(.satyrn-hero) {
    Layered heading effect: the h1 itself is the filled display face in the brand
    heading colour (front layer), and a `::before` draws the same text in the
    OUTLINE face, offset down-right in the echo colour (back layer). The copy
-   comes from `data-title`, stamped onto the h1 by blog-dates.js -- the theme
-   generates this h1 from the title, so there is no markup to duplicate by hand,
-   and without JS the reader simply gets the plain filled title. `z-index: 0`
+   comes from `data-title`, which partials/content.html stamps onto the h1 from
+   the page title, so there is no markup to duplicate by hand. `z-index: 0`
    makes the h1 a stacking context so the `-1` echo tucks behind its glyphs.
 
    The theme's h1 margin (1.25em) plus Triple Charm's tall line box left far too
@@ -2308,7 +2370,8 @@ html:has(.satyrn-hero) {
 
 /* ---------------------------------------------------------- link underline --
    The ONE definition of the underlined text-link affordance, shared by every
-   text link: running prose, post titles, byline authors and footer links.
+   text link: running prose, footer links, author names and the blog's titles,
+   meta and "Continue reading" links.
 
    A native text-decoration underline: it skips descender ink and wraps
    correctly across lines, and text-decoration-color lets the underline be blue
@@ -2322,12 +2385,16 @@ html:has(.satyrn-hero) {
    carries one, so `a:not([class])` excludes them all automatically -- a new
    component needs zero changes here. The only guard is `.satyrn-card a`: those
    title links are unclassed but must stay bare (the whole card is the target).
-   Classed links that DO want the underline (footer, byline) opt in explicitly
+   Classed links that DO want the underline (footer, blog) opt in explicitly
    below. The affordance (WCAG 1.4.1) is the underline's presence; its contrast
    is decorative, the text tier carries 1.4.3. */
 .md-typeset :is(p, li, td, dd) a:not([class]):not(.satyrn-card a),
-.satyrn-post__title a,
-.satyrn-byline__author > a,
+a.satyrn-byline__link,
+a.satyrn-post-author,
+.md-post--excerpt .md-post__content > h2:first-child > .toclink,
+.md-post__action a,
+a.md-meta__link,
+.md-profile__description a,
 .satyrn-footer__link,
 .satyrn-footer__link--inline,
 .satyrn-footer__credit a,
@@ -2340,8 +2407,12 @@ html:has(.satyrn-hero) {
 }
 
 .md-typeset :is(p, li, td, dd) a:not([class]):not(.satyrn-card a):hover,
-.satyrn-post__title a:hover,
-.satyrn-byline__author > a:hover,
+a.satyrn-byline__link:hover,
+a.satyrn-post-author:hover,
+.md-post--excerpt .md-post__content > h2:first-child > .toclink:hover,
+.md-post__action a:hover,
+a.md-meta__link:hover,
+.md-profile__description a:hover,
 .satyrn-footer__link:hover,
 .satyrn-footer__link--inline:hover,
 .satyrn-footer__credit a:hover,
@@ -2365,20 +2436,6 @@ html:has(.satyrn-hero) {
   background-color: var(--satyrn-accent);
 }
 
-/* Tags on post pages. */
-.md-typeset .md-tag {
-  border: 1px solid var(--satyrn-border-strong);
-  background-color: transparent;
-  color: var(--satyrn-accent-text);
-  font-size: 0.7rem;
-}
-
-.md-typeset .md-tag:hover {
-  border-color: var(--satyrn-accent);
-  background-color: var(--md-accent-fg-color--transparent);
-  color: var(--satyrn-accent-text);
-}
-
 /* Footer nav links inherit the footer's text colour (via the shared
    link-underline rule); only the blue underline marks them. The focus ring
    lives in the :focus-visible block below. */
@@ -2392,7 +2449,13 @@ html:has(.satyrn-hero) {
 .satyrn-footer__home:focus-visible,
 .satyrn-arrow-link:focus-visible,
 .satyrn-byline__link:focus-visible,
-.satyrn-post__title a:focus-visible {
+.satyrn-post-author:focus-visible,
+.md-post--excerpt .md-post__content > h2:first-child > .toclink:focus-visible,
+.md-post__action a:focus-visible,
+.md-meta__link:focus-visible,
+.md-profile__description a:focus-visible,
+.md-typeset .md-tag[href]:focus-visible,
+.md-pagination__link:focus-visible {
   outline: 2px solid currentcolor;
   outline-offset: 2px;
   border-radius: 2px;

@@ -147,9 +147,38 @@ link colour across browsers.
 
 </div>
 
-### Blog post card
+### Blog listing row
 
-<ul class="satyrn-posts"><li class="satyrn-post"><h2 class="satyrn-post__title"><a href="/design/typography/">Introducing Satyrn Zen and our Team Compass</a></h2><p class="satyrn-post__meta"><time datetime="2026-08-15">2026-08-15</time> <span class="satyrn-post__author">Carol Willing</span></p><p class="satyrn-post__summary">Welcome to Satyrn where we care about sharing knowledge and empowering you on your journey with AI systems.</p></li></ul>
+One row of the blog index, as Zensical's blog plugin emits it,
+trimmed to a single post.
+Its `article`, `header` and `nav` are `div`s here,
+since the lint allows only the elements real pages need;
+the styling hangs on the classes alone.
+The author name is our hook, `.satyrn-post-author`,
+set in the handwritten face.
+
+<div class="md-post md-post--excerpt">
+  <div class="md-post__header">
+    <div class="md-post__authors md-typeset">
+      <span class="md-author"><img src="/assets/avatars/contributors/willingc.jpg" alt="" width="128" height="128"></span>
+      <a class="satyrn-post-author" href="/design/typography/">Carol Willing</a>
+    </div>
+    <div class="md-post__meta md-meta">
+      <ul class="md-meta__list">
+        <li class="md-meta__item"><time datetime="2026-08-15">August 15, 2026</time></li>
+        <li class="md-meta__item">in <a href="/design/typography/" class="md-meta__link">Announcements</a></li>
+        <li class="md-meta__item">3 min read</li>
+      </ul>
+    </div>
+  </div>
+  <div class="md-post__content md-typeset">
+    <h2><a class="toclink" href="/design/typography/">Introducing Satyrn Zen and our Team Compass</a></h2>
+    <p>Welcome to Satyrn where we care about sharing knowledge and empowering you on your journey with "trusted and transparent" AI.</p>
+    <div class="md-post__action">
+      <a href="/design/typography/">Continue reading</a>
+    </div>
+  </div>
+</div>
 
 ### Tags
 
