@@ -23,6 +23,32 @@ A stray colon discards the whole block, `template:` included,
 while the build still reports success,
 so `--strict` cannot see it and something else has to.
 
+## Pre-commit hooks
+
+`prek.toml` defines the checks that run on files rather than on the built site:
+markdownlint, cspell, `check-frontmatter`, editorconfig-checker,
+and the whitespace, line-ending and config-syntax hooks.
+Install them once with `uv run prek install`,
+and they run on the files in each commit.
+
+`just lint` runs the same hooks over every tracked file,
+so a new post or page is skipped until it has been through `git add`.
+`just ci` calls `just lint`, and CI runs `just ci`,
+so a markdownlint or spelling failure shows up at commit time
+instead of in CI.
+
+The whitespace and end-of-file hooks fix the file and fail the commit.
+Stage their changes and commit again.
+
+[prek](https://prek.j178.dev/) is a drop-in replacement for pre-commit.
+`prek.toml` is its own format, which plain `pre-commit` cannot read.
+`uv run prek` uses the version pinned in `pyproject.toml`,
+and `prek.toml` pins each hook repository to a commit.
+
+`check-nav`, `check-blog`, `check-assets`, `check-placeholders` and `weigh`
+read the built site, so they stay in the justfile
+and only `just ci` runs them.
+
 ## Where things live
 
 | Path | What it is |

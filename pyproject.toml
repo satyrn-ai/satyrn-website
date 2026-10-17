@@ -9,6 +9,7 @@ dependencies = [
 ]
 [dependency-groups]
 dev = [
+    "prek==0.5.5",
     "rust-just>=1.42.4",
     "zensical>=0.0.71",
     "pyyaml>=6.0",
