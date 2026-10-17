@@ -31,14 +31,6 @@
   <div class="satyrn-home-nav">{{ super() }}</div>
 {% endblock %}
 
-{#-
-  The page's own markdown, then the latest posts. The feed lives here rather
-  than in src/index.md because only a template can walk `nav`.
--#}
-{% block content %}
-  {{ super() }}
-{% endblock %}
-
 {% block footer %}
   {# The id="get-involved" anchor this used to carry is gone: Get Involved is a
      real page now, so the nav links there instead of jumping to the footer. #}

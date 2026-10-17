@@ -435,6 +435,13 @@ categories = ["categories", "tags"]
 json_feed_enabled = false
 feeds_filenames = { rss_created = "feed.xml" }
 
+# The landing page's latest-post cards: main.py at the repository root, looped
+# over in src/index.md. Only pages with `render_macros: true` are rendered.
+[project.plugins.macros]
+render_by_default = false
+on_error_fail = true
+on_undefined = "strict"
+
 [project.extra]
 # Matched against rendered page titles character for character, em dash
 # included. A title that does not match is not an error: the item silently

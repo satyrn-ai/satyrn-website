@@ -1,5 +1,6 @@
 ---
 template: home.html
+render_macros: true
 title: AI Our Way
 description: "A human-centric home for Python developers to do AI Our Way. Trusted, from us, for us. Conversation, sharing, innovation, and building software tools."
 ---
@@ -208,3 +209,22 @@ and build something we're proud of.
 </div>
 
 [discord]: https://discord.gg/v4uejrA88f
+
+{% if latest_posts %}
+<section class="satyrn-latest" aria-labelledby="satyrn-latest-title">
+<div class="satyrn-latest__head">
+<h2 id="satyrn-latest-title">Latest from the blog</h2>
+<a class="satyrn-arrow-link" href="blog/index.md">All posts</a>
+</div>
+<ul class="satyrn-latest__grid">
+{% for p in latest_posts[:config.extra.home_posts_count] %}
+<li class="satyrn-card">
+<p class="satyrn-card__meta"><time datetime="{{ p.date }}">{{ p.date.strftime("%B") }} {{ p.date.day }}, {{ p.date.year }}</time></p>
+<h3 class="satyrn-card__title"><a href="{{ p.url }}">{{ p.title | e }}</a></h3>
+{% if p.description %}<p class="satyrn-card__summary">{{ p.description | e }}</p>{% endif %}
+{% if p.authors %}<p class="satyrn-card__byline">{% for a in p.authors %}{% if not loop.first %}, {% endif %}{{ a.name | e }}{% endfor %}</p>{% endif %}
+</li>
+{% endfor %}
+</ul>
+</section>
+{% endif %}

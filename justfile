@@ -169,10 +169,10 @@ check-nav: build
 # Check the blog's posts and its generated feed hold together
 check-blog: build
     #!/usr/bin/env -S uv run --with pyyaml python
-    import pathlib, sys, tomllib, xml.dom.minidom, yaml
-    # The blog plugin enforces dates, registered authors and allowed
-    # categories. This covers what it does not: descriptions, the feed's shape,
-    # and the article metadata our own template adds.
+    import pathlib, re, sys, tomllib, xml.dom.minidom
+    # The blog plugin enforces registered authors and allowed categories.
+    # This covers what it does not: bare dates, descriptions, the feed's
+    # shape, the article metadata our own template adds, and the landing cards.
     failures = []
 
     def check(label, ok, detail=""):
@@ -180,20 +180,25 @@ check-blog: build
         if not ok:
             failures.append(label)
 
-    def front_matter(path):
-        _, _, rest = path.read_text().partition("---")
-        block, _, _ = rest.partition("\n---")
-        return yaml.safe_load(block) or {}
+    # The landing cards and this check read posts the same way.
+    sys.path.insert(0, "")
+    from main import POSTS, front_matter
 
     config = tomllib.loads(pathlib.Path("zensical.toml").read_text())
     site_url = config["project"]["site_url"]
-    posts = {p: m for p in sorted(pathlib.Path("src/blog/posts").rglob("*.md"))
+    posts = {p: m for p in sorted(POSTS.rglob("*.md"))
              if not (m := front_matter(p)).get("draft")}
 
     for path, meta in posts.items():
         # Listings, link previews and the feed all render this. Absent, the
         # entry ships with an empty description.
         check(f"{path}: has a description", bool(meta.get("description")))
+        # The plugin also accepts datetimes and `{created: ...}`, but
+        # article:published_time, the card URLs and the sort here assume a
+        # bare date.
+        check(f"{path}: date is exactly YYYY-MM-DD",
+              re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(meta.get("date", ""))) is not None,
+              f"got {meta.get('date')!r}")
 
     feed = pathlib.Path("site/feed.xml")
     if not feed.exists():
@@ -244,6 +249,16 @@ check-blog: build
         html = built.read_text()
         check(f"{path}: page carries article metadata",
               'property="og:title"' in html and 'property="article:published_time"' in html)
+
+    # The landing page cards come from main.py, which builds post URLs itself.
+    home_html = pathlib.Path("site/index.html").read_text()
+    home_posts_count = config["project"]["extra"]["home_posts_count"]
+    expected = min(home_posts_count, len(posts))
+    cards = re.findall(r'class="satyrn-card__title"><a href="([^"]+)"', home_html)
+    check(f"landing page shows {expected} cards", len(cards) == expected, f"found {len(cards)}")
+    for href in cards:
+        built = pathlib.Path("site") / href.strip("/") / "index.html"
+        check(f"{href}: card resolves to a built post", built.exists())
 
     print(f"\n{len(failures)} blog check(s) failed" if failures else "\nAll blog checks passed")
     sys.exit(1 if failures else 0)
