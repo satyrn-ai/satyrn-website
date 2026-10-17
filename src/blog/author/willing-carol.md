@@ -1,6 +1,4 @@
 ---
-index: author
-author: willing-carol
 title: Carol Willing
 description: "Posts by Carol Willing."
 ---

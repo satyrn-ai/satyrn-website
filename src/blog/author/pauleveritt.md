@@ -1,6 +1,4 @@
 ---
-index: author
-author: pauleveritt
 title: Paul Everitt
 description: "Posts by Paul Everitt."
 ---

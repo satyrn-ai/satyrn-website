@@ -11,6 +11,8 @@ description: "Some thoughts on why knowledge sharing is important - for communit
 
 Knowledge sharing brings people together. Why do I think this matters? I believe it benefits the people who learn, the groups they belong to, and the people doing the sharing.
 
+<!-- more -->
+
 ## Expansion
 
 While most resources shrink when you share them, knowledge, however, grows and

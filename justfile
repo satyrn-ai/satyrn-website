@@ -169,10 +169,10 @@ check-nav: build
 # Check the blog's posts and its generated feed hold together
 check-blog: build
     #!/usr/bin/env -S uv run --with pyyaml python
-    import pathlib, re, sys, tomllib, xml.dom.minidom, yaml
-    # The blog is templates walking the `nav` tree, so most of what would be a
-    # plugin's job is nobody's. The build catches an unregistered author, by
-    # raising on the undefined lookup. It catches none of the rest.
+    import pathlib, sys, tomllib, xml.dom.minidom, yaml
+    # The blog plugin enforces dates, registered authors and allowed
+    # categories. This covers what it does not: descriptions, the feed's shape,
+    # and the article metadata our own template adds.
     failures = []
 
     def check(label, ok, detail=""):
@@ -186,26 +186,14 @@ check-blog: build
         return yaml.safe_load(block) or {}
 
     config = tomllib.loads(pathlib.Path("zensical.toml").read_text())
-    authors = config["project"].get("extra", {}).get("authors", {})
-    posts = {p: m for p in sorted(pathlib.Path("src/blog").rglob("*.md"))
-             if "date" in (m := front_matter(p))}
+    site_url = config["project"]["site_url"]
+    posts = {p: m for p in sorted(pathlib.Path("src/blog/posts").rglob("*.md"))
+             if not (m := front_matter(p)).get("draft")}
 
     for path, meta in posts.items():
-        # The feed appends a literal `T00:00:00Z`, so anything richer than a
-        # bare date -- a datetime, a quoted string -- corrupts every entry.
-        check(f"{path}: date is exactly YYYY-MM-DD",
-              re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(meta.get("date", ""))) is not None,
-              f"got {meta.get('date')!r}")
         # Listings, link previews and the feed all render this. Absent, the
-        # entry ships with an empty <summary>.
+        # entry ships with an empty description.
         check(f"{path}: has a description", bool(meta.get("description")))
-        for slug in meta.get("authors") or []:
-            check(f"{path}: author '{slug}' is registered", slug in authors)
-        for tag in meta.get("tags") or []:
-            # Nothing at build time notices: the chip still renders as a live
-            # link to a dead URL.
-            check(f"{path}: tag '{tag}' has src/tags/{tag}.md",
-                  pathlib.Path(f"src/tags/{tag}.md").exists())
 
     feed = pathlib.Path("site/feed.xml")
     if not feed.exists():
@@ -224,29 +212,38 @@ check-blog: build
         doc = xml.dom.minidom.parseString(raw)
         check("feed is well-formed XML", True)
     except Exception as e:
-        # Autoescape is off in MiniJinja, so an unescaped `&` in a title lands
-        # here and breaks the feed for every subscriber at once.
+        # This catches an unescaped `&` in a post title, which would otherwise ship
+        # a feed that readers reject.
         check("feed is well-formed XML", False, str(e))
         sys.exit(1)
-    entries = doc.getElementsByTagName("entry")
-    check(f"feed has one entry per post ({len(entries)} entries, {len(posts)} posts)",
-          len(entries) == len(posts))
+    root = doc.documentElement
+    check("feed is RSS 2.0", root.tagName == "rss" and root.getAttribute("version") == "2.0",
+          f"got <{root.tagName} version={root.getAttribute('version')!r}>")
+    items = doc.getElementsByTagName("item")
+    # The rss plugin stops at `length` items, newest first.
+    length = config["project"]["plugins"]["rss"].get("length", 20)
+    feed_expected = min(len(posts), length)
+    check(f"feed has one item per post up to the rss length cap "
+          f"({len(items)} items, {len(posts)} posts, cap {length})",
+          len(items) == feed_expected)
+
+    for item in items:
+        links = item.getElementsByTagName("link")
+        link = links[0].firstChild.data.strip() if links and links[0].firstChild else ""
+        if not link.startswith(site_url):
+            check(f"{link!r}: feed item links under {site_url}", False)
+            continue
+        built = pathlib.Path("site") / link[len(site_url):].strip("/") / "index.html"
+        check(f"{link}: feed item resolves to a built page", built.exists())
 
     for path, meta in posts.items():
-        built = pathlib.Path("site") / path.relative_to("src").with_suffix("") / "index.html"
+        built = pathlib.Path("site/blog") / str(meta["date"])[:4] / path.stem / "index.html"
         if not built.exists():
             check(f"{built} was built", False)
             continue
         html = built.read_text()
         check(f"{path}: page carries article metadata",
               'property="og:title"' in html and 'property="article:published_time"' in html)
-        # Mastodon credits one creator per page, so authors[0] wins and author
-        # order in front matter is meaningful.
-        creators = re.findall(r'<meta name="fediverse:creator" content="([^"]*)"', html)
-        first = (meta.get("authors") or [None])[0]
-        expected = [f] if (f := authors.get(first, {}).get("fediverse")) else []
-        check(f"{path}: credits at most the first author to the fediverse",
-              creators == expected, f"{creators!r} != {expected!r}")
 
     print(f"\n{len(failures)} blog check(s) failed" if failures else "\nAll blog checks passed")
     sys.exit(1 if failures else 0)

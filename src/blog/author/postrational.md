@@ -1,6 +1,4 @@
 ---
-index: author
-author: postrational
 title: Michał Karzyński
 description: "Posts by Michał Karzyński."
 ---

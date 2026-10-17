@@ -48,10 +48,6 @@ copyright = """
 
 docs_dir = "src"
 extra_css = ["stylesheets/satyrn.css"]
-# `feed.xml` is a MiniJinja template, not a page: `extra_templates` renders it
-# with the same `nav` tree the pages get, which is what makes the feed possible
-# without a plugin system.
-extra_templates = ["feed.xml"]
 # space.js is the hero's pointer parallax and crew.js the contributor carousel.
 # Both return at once on any page without their element, so loading them
 # site-wide costs two small, cached requests.
@@ -421,10 +417,24 @@ unresolved_footnotes = true
 unresolved_references = true
 
 # ----------------------------------------------------------------------------
-# Blog. Zensical ships no blog support and has no plugin system, so everything
-# below is read by the templates in `overrides/`, which walk the `nav` tree and
-# filter on front matter. See docs/BLOG.md for why it works this way.
+# Blog, tags and feed come from Zensical's blog, tags and rss plugins.
 # ----------------------------------------------------------------------------
+[project.plugins.blog]
+post_url_format = "{date}/{file}"
+post_url_date_format = "yyyy"
+post_excerpt = "required"
+authors_profiles = true
+categories_allowed = ["Announcements"]
+
+[project.plugins.tags]
+
+[project.plugins.rss]
+match_path = "blog/posts/.*"
+date_from_meta = { as_creation = "date" }
+categories = ["categories", "tags"]
+json_feed_enabled = false
+feeds_filenames = { rss_created = "feed.xml" }
+
 [project.extra]
 # Matched against rendered page titles character for character, em dash
 # included. A title that does not match is not an error: the item silently
@@ -507,30 +517,3 @@ page = "Get Involved"
 
 [[project.extra.nav_menu]]
 title = "Blog"
-
-# Authors. `name` is the only required key; `title`, `url`, `avatar` and
-# `fediverse` all degrade quietly when absent. A post naming a slug with no
-# table here fails the build, which is the one piece of referential integrity
-# that comes for free.
-#
-# `url` is linked from the byline. `fediverse` only builds a meta tag and is
-# never rendered, and it takes effect only once that account has enabled author
-# attribution in its Mastodon profile.
-#
-# There are none yet. `src/authors/<slug>.md` and a table here are both needed
-# before a post can name that slug; see "Adding a blog author" in
-# CONTRIBUTING.md.
-
-[project.extra.authors.pauleveritt]
-name = "Paul Everitt"
-
-[project.extra.authors.postrational]
-name = "Michał Karzyński"
-
-[project.extra.authors.willing-carol]
-name = "Carol Willing"
-url = "https://willingconsulting.com"
-
-[project.extra.authors.cooke-emma]
-name = "Emma Cooke"
-url = "https://github.com/emmaco"

@@ -37,7 +37,6 @@
 -#}
 {% block content %}
   {{ super() }}
-  {% include "partials/home-blog.html" %}
 {% endblock %}
 
 {% block footer %}
@@ -84,7 +83,7 @@
             <li><a class="satyrn-footer__link" href="{{ config.extra.discord_url }}">Discord</a></li>
             <li><a class="satyrn-footer__link" href="https://satyrn-ai.github.io/team-compass/">Team Compass</a></li>
             <li><a class="satyrn-footer__link" href="https://github.com/satyrn-ai">GitHub</a></li>
-            <li><a class="satyrn-footer__link" href="{{ 'feed.xml' | url }}">Atom feed</a></li>
+            <li><a class="satyrn-footer__link" href="{{ 'feed.xml' | url }}">RSS feed</a></li>
           </ul>
         </div>
       </nav>

@@ -3,10 +3,11 @@ title: Introducing Satyrn Zen and our Team Compass
 date: 2026-08-15
 authors:
   - willing-carol
+categories:
+  - Announcements
 tags:
   - education
   - governance
-  - announcements
   - community
 description: "Welcome to Satyrn where we care about sharing knowledge and empowering you on your journey with AI systems."
 ---
@@ -15,6 +16,8 @@ Welcome to Satyrn where we care about sharing knowledge and empowering you
 on your journey with "trusted and transparent" AI. We've learned some valuable
 lessons during our time in the Python community working with the Python
 language and want to share those lessons with you.
+
+<!-- more -->
 
 ## Who is Satyrn
 

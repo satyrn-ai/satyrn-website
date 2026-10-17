@@ -9,6 +9,8 @@ description: "The first AI models to support Python 3.15, released on its releas
 Today we are releasing the first open-weight AI model to support Python 3.15, on its
 release date.
 
+<!-- more -->
+
 Hi, I'm Michał Karzyński, team lead for the Satyrn Models team. This is our first Satyrn
 Models deliverable, helping us deliver "AI Our Way" by supporting routine Python development
 on reasonable computers.
