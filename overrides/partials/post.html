@@ -1,0 +1,77 @@
+{#- Copy of the stock partial. Native listing rows show only the avatar, so
+    the author's name is added beside it, linked to their profile. The
+    authors wrapper is a div, not the stock nav, so a listing does not repeat
+    an unlabelled landmark per row, and `datetime` carries the date alone,
+    since the stock value is not a valid datetime string. -#}
+<article class="md-post md-post--excerpt">
+  <header class="md-post__header">
+    {% if post.authors %}
+      <div class="md-post__authors md-typeset">
+        {% for author in post.authors %}
+          <span class="md-author">
+            <img src="{{ author.avatar | url }}" alt="">
+          </span>
+        {% endfor %}
+        {#- Every name in one flex item, so the row's gap does not open up
+            before each generated comma. -#}
+        <span>
+          {%- for author in post.authors -%}
+            <a class="satyrn-post-author" href="{{ author.url | url }}">{{ author.name | e }}</a>
+          {%- endfor -%}
+        </span>
+      </div>
+    {% endif %}
+    <div class="md-post__meta md-meta">
+      <ul class="md-meta__list">
+        <li class="md-meta__item">
+          <time datetime="{{ (post.config.date.created | string)[:10] }}">
+            {{- post.config.date.created | date -}}
+          </time>
+          {#- Collapse whitespace -#}
+        </li>
+        {% if post.categories %}
+          <li class="md-meta__item">
+            {{ lang.t("blog.categories.in") }}
+            {% for category in post.categories %}
+              <a href="{{ category.url | url }}" class="md-meta__link">
+                {{- category.title -}}
+              </a>
+              {%- if loop.revindex > 1 %}, {% endif -%}
+            {% endfor -%}
+          </li>
+        {% endif %}
+        {% if post.config.readtime %}
+          {% set time = post.config.readtime %}
+          <li class="md-meta__item">
+            {% if time == 1 %}
+              {{ lang.t("readtime.one") }}
+            {% else %}
+              {{ lang.t("readtime.other") | replace("#", time) }}
+            {% endif %}
+          </li>
+        {% endif %}
+        {% if post.config.pin %}
+          <span class="md-pin"></span>
+        {% endif %}
+      </ul>
+      {% if post.config.draft %}
+        <span class="md-draft">
+          {{ lang.t("blog.draft") }}
+        </span>
+      {% endif %}
+    </div>
+  </header>
+  <div class="md-post__content md-typeset">
+    {{ post.content }}
+    {% if post.more %}
+      <nav class="md-post__action">
+        <a href="{{ post.url | url }}">
+          {{ lang.t("blog.continue") }}
+        </a>
+      </nav>
+    {% endif %}
+    {% if post.config.pin %}
+      <hr>
+    {% endif %}
+  </div>
+</article>

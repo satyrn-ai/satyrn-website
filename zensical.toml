@@ -423,6 +423,10 @@ unresolved_references = true
 post_url_format = "{date}/{file}"
 post_url_date_format = "yyyy"
 post_excerpt = "required"
+# Listing rows show only a post's first author unless this is raised. Four
+# covers every post so far with room to spare; past it, the row drops names
+# while the byline and the profiles still list everyone.
+post_excerpt_max_authors = 4
 authors_profiles = true
 categories_allowed = ["Announcements"]
 
@@ -460,22 +464,19 @@ nav_order = [
     "Satyrn Zen",
     "Blog",
     "Tags",
-    "Authors",
 ]
 # Rendered as a single link rather than an expanded tree. Each needs an index
-# page for the link to target, which is what src/tags/index.md and
-# src/authors/index.md are for.
-nav_collapse = ["Authors", "Tags", "Projects"]
-# Rendered as a link plus its most recent posts, newest first.
-nav_recent = ["Blog"]
-nav_recent_count = 5
+# page for the link to target, which is what src/tags/index.md is for. Blog is
+# deliberately absent: its generated children (Archive, Categories, Authors)
+# are the sidebar for the whole section.
+nav_collapse = ["Tags", "Projects"]
 # How many posts the landing page's "Latest from the blog" cards show.
 home_posts_count = 3
 # Kept out of the sidebar and the mobile drawer, except on their own pages,
 # where the item is what gives the page a sidebar at all. Both are reached from
 # the tag chips on a post, the byline, and the blog index -- they are archives,
 # not destinations, and listing them alongside Mission oversells them.
-nav_hide = ["Tags", "Authors", "Accessibility", "Design", "Projects"]
+nav_hide = ["Tags", "Accessibility", "Design", "Projects"]
 # The default social card, used by every page that does not set `image:` in its
 # front matter. Root-relative and without a leading slash: overrides/main.html
 # concatenates it onto `site_url`, which already ends in one.
