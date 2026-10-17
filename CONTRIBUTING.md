@@ -29,18 +29,19 @@ so `--strict` cannot see it and something else has to.
 | --- | --- |
 | `src/index.md` | The landing page. All of its copy is here as markdown. |
 | `src/mission.md`, `src/local-first.md`, `src/get-involved.md` | Top-level pages. Unfinished sections carry a "Still being written" admonition. |
-| `src/blog/<year>/` | Posts, one markdown file each. |
-| `src/authors/`, `src/tags/` | An index page plus one page per author and per tag. |
-| `src/feed.xml` | The Atom feed, rendered as a template rather than a page. |
+| `src/blog/posts/` | Posts, one markdown file each. |
+| `src/blog/.authors.yml`, `src/blog/author/` | The author registry, and one bio page per author. |
+| `src/tags/index.md` | The tags page. Chips on posts link into it. |
+| `main.py` | Reads the posts from disk for the landing page cards. |
 | `src/stylesheets/satyrn.css` | Brand palette, landing page layout, blog styling. |
 | `src/assets/` | Logos, mascot artwork, favicon, and the generated social card. |
-| `overrides/main.html` | Head additions, link previews and the listing block, applied to every page. |
+| `overrides/main.html` | Head additions and link previews, applied to every page. |
 | `overrides/home.html` | The landing page shell: its own footer, and the wrapper that keeps its sidebar to the mobile drawer. |
-| `overrides/partials/` | The chrome, shadowed from the theme — `tabs.html`, `nav.html`, `footer.html` — plus the blog's own `post-byline.html`, `post-item.html` and `tags.html`. |
+| `overrides/partials/` | The chrome, shadowed from the theme (`tabs.html`, `nav.html`, `footer.html`), plus the blog's `content.html`, `post-byline.html` and `post.html`. |
 | `justfile` | Every command. `just` with no argument lists them. |
 
 `docs/BLOG.md` covers the blog's implementation:
-why it is templates rather than a plugin,
+how the plugins and our overrides fit together,
 and which parts of it break without saying so.
 Read that before changing anything under `overrides/`.
 
@@ -67,10 +68,9 @@ That is the good case: it is loud rather than silent.
 
 Navigation comes from the directory tree.
 There's no `nav` list in `zensical.toml` on purpose:
-the blog reads that same tree to build its listings and feed,
-so a post the tree doesn't reach is a post they can't see.
-A hand-written list would have to name every post to stay correct,
+a hand-written list would have to name every page to stay correct,
 and says nothing when it stops doing so.
+The blog does not read it: the blog plugin builds its own sections.
 
 ## Voice
 
@@ -113,19 +113,19 @@ Each of these has already cost someone an afternoon.
 
 ### A page title that stops matching
 
-Five settings in `[project.extra]` address pages by their rendered title:
-`nav_order`, `nav_collapse`, `nav_recent`, `nav_hide` and `nav_tabs`.
+These settings in `[project.extra]` address pages by their rendered title:
+`nav_order`, `nav_collapse`, `nav_hide` and `nav_menu`.
 The match is character for character, em dash included.
 
 None of them error on a title that matches nothing.
 An unmatched `nav_order` entry drops the page to the end of the sidebar;
-an unmatched `nav_tabs` entry removes the tab altogether.
+an unmatched `nav_menu` entry removes the menu item altogether.
 Both build clean.
 
 So renaming a page means grepping `zensical.toml` for its old title.
-`just check-nav` covers the tab bar,
+`just check-nav` covers the menu bar,
 by comparing what the built page renders against the configured list.
-The other four are on you.
+The rest are on you.
 
 ### A bare colon in front matter
 
@@ -237,7 +237,8 @@ Body text indents four spaces.
 
 ## Writing a blog post
 
-A post is a markdown file at `src/blog/<year>/<slug>.md` with the following front matter in `yaml` format:
+A post is a markdown file at `src/blog/posts/<file>.md`,
+with front matter in `yaml` format:
 
 ```yaml
 ---
@@ -245,13 +246,22 @@ title: Your Post Title
 date: 2026-08-15
 authors:
   - example
+categories:
+  - Announcements
 tags:
   - engineering
 description: One sentence. It carries the listing row, the link preview and the feed.
 ---
+
+The opening paragraph, which is the excerpt in the listing.
+
+<!-- more -->
+
+The rest of the post.
 ```
 
-Your post's content is written in Markdown.
+The post builds to `/blog/<year>/<file>/`.
+The filename is part of the URL, so renaming a post moves it.
 
 ### Frontmatter notes
 
@@ -260,42 +270,64 @@ Lists go one item per line, not `[example]`.
 reference link and fails the build looking for a definition of `[example]`.
 The rest of the site writes them this way too.
 
-Four of those five keys have a way of going wrong quietly,
-which is what `just check-blog` is for.
+`<!-- more -->` is required.
+It ends the excerpt shown in the listing, and a post without one fails the build.
 
-`date` has to be exactly `YYYY-MM-DD`.
-The feed appends a literal `T00:00:00Z` to it,
-so a fuller datetime produces a timestamp no reader will parse.
+`date` is a plain `YYYY-MM-DD`; `just check-blog` fails on a time or any other form.
 
-`authors` are slugs from `[project.extra.authors]` in `zensical.toml`.
-Order matters: only the first is credited as the fediverse creator,
-because Mastodon attributes one author per page.
-An unregistered slug does fail the build,
-but the error reads `undefined value` and never names the slug.
+`authors` are slugs from `src/blog/.authors.yml`.
+An unregistered slug fails the build.
+List every author on the post;
+the byline and each profile show all of them,
+and the listing rows show up to `post_excerpt_max_authors` from `zensical.toml`.
 
-`tags` each need a matching `src/tags/<tag>.md`.
-Nothing at build time notices a missing one —
-the chip still renders as a live link to a dead URL.
+`categories` must come from `categories_allowed` in `zensical.toml`.
+A value outside that list does not build.
+
+`tags` are free text.
+They need no file: each chip links to `tags/#tag:<name>` on the tags page.
 
 `description` is optional to the build and load-bearing everywhere else.
-Without it the listing row and the feed entry both come out empty.
+Without it the listing row and the feed entry both come out empty,
+and `just check-blog` fails.
+
+`draft: true` leaves the post out of the build, the listing, the feed and the landing page.
 
 An `image:` key overrides the link preview image for that post.
 Without one the post falls back to the site-wide card at `extra.og_image`,
 which `just og-image` builds.
 
+The feed is RSS 2.0 at `/feed.xml`.
+`match_path = "blog/posts/.*"` on the `rss` plugin is what keeps other pages out of it,
+so a post has to live under `src/blog/posts/` to appear there.
+
+The landing page cards read the posts from `main.py`,
+which builds each URL itself and so repeats `post_url_format`.
+Change that setting and `just check-blog` fails until `main.py` agrees.
+
 ### Adding a blog author
 
-To add an author, two files must be edited:
+Each author needs:
 
-- `zensical.toml` needs an entry for the author in the `[project.extra.authors.<slug>]` table
-- `src/authors/<slug>.md`
+- `src/blog/.authors.yml` needs an entry under `authors:`,
+  with `name`, `avatar` and a one-line `description`.
+  All three are required.
+  The description is plain text, shown in the author card on the post.
+- `src/blog/author/<slug>.md` holds the bio in markdown.
+  It renders on the author's profile page, above their posts.
+  Its front matter needs a quoted `description`, such as `"Posts by Carol Willing."`,
+  which becomes the profile's link-preview text.
 
-### Blog and author indexes
+Leave `url` out of the yml entry.
+When it is set, author names link to that address instead of the profile,
+and nothing on the site links to the profile.
 
-Neither directory's `index.md` is decorative:
-the sidebar collapses each section onto its index,
-and a section without one renders expanded instead.
+### Blog and tags indexes
+
+`src/blog/index.md` is the blog's landing page,
+and `src/tags/index.md` holds the `<!-- material/tags -->` marker the tags plugin fills.
+The Blog sidebar section shows the generated Archive, Categories and Authors pages.
+Old `/tags/<tag>/` and `/authors/<slug>/` URLs are not redirected.
 
 ## Pages and layout
 
@@ -311,6 +343,11 @@ Every other page uses the stock Zensical layout,
 sidebar and search,
 with the same brand palette over it.
 
+The landing page is hand-written HTML wrapped around markdown,
+and `.markdownlint.jsonc` allows the elements it needs.
+That includes `<section>`, used for the latest-post cards as a labelled region.
+Any other element, `<br>` or `<b>` say, is still flagged by `just lint`.
+
 Note what is *not* there.
 `hide: navigation` looks like the way to give the landing page its full width,
 and it is a trap:
@@ -323,12 +360,12 @@ and one media query hides it above the same width the tab bar appears at.
 
 ### Navigation
 
-Three things carry it, and they are configured separately.
+The menu bar, the sidebar and the previous/next links are configured separately.
 
-The tab bar is `[[project.extra.nav_tabs]]`,
+The menu bar is `[[project.extra.nav_menu]]`,
 rendered by `overrides/partials/tabs.html`.
 It is an editorial list, not a mirror of the top level:
-adding `src/whatever.md` does not earn it a tab.
+adding `src/whatever.md` does not earn it a menu item.
 Entries resolve against the nav tree rather than carrying their own URLs,
 so links and active states stay the theme's job.
 
@@ -357,10 +394,6 @@ nor offer links back out of themselves.
 so adding a section to it removes it from the chrome everywhere at once.
 
 There is deliberately no `nav` list in `zensical.toml`.
-The blog reads the same derived tree for its listings and feed,
-so the tree has to reach every post; deriving it guarantees that,
-where a hand-written list only promises it.
-See "Rules that break things silently" in `docs/BLOG.md` for what that costs.
 
 The pillar cards use the theme's own `grid cards`:
 a markdown list inside `<div class="grid cards satyrn-pillars" markdown>`,

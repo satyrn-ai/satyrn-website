@@ -20,7 +20,7 @@
   // pillar grid and mission block; <section> for the latest-post cards, a
   // labelled region; <picture>/<source>/<img> for AVIF with a
   // WebP fallback; and <svg>/<path> for the inlined brandmark (inlined so its
-  // fills recolour per scheme). Anything else -- <span>, <br>, <b>, a raw
+  // fills recolour per scheme). Anything else -- <br>, <b>, a raw
   // <table> -- still gets flagged, which is the point.
   "MD033": { "allowed_elements": ["div", "picture", "source", "img", "svg", "path", "h1", "h2", "h3", "h4", "h5", "h6", "p", "strong", "a", "ul", "li", "time", "span", "code", "iframe", "section"] }
 }

@@ -28,6 +28,11 @@ Writing a page means adding a markdown file under `src/`.
 The navigation picks it up from the directory tree,
 and `just serve` reloads as you save.
 
+A blog post is a markdown file in `src/blog/posts/`,
+and an author is an entry in `src/blog/.authors.yml` plus a bio in `src/blog/author/`.
+The blog, tags and feed come from Zensical's `blog`, `tags` and `rss` plugins.
+Both are covered in [CONTRIBUTING.md](CONTRIBUTING.md).
+
 Not a `just` user?
 The commands underneath are `uv run zensical serve` and `uv run zensical build --strict`.
 `just serve` additionally points `site_url` at localhost first,
