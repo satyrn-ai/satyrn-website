@@ -10,8 +10,18 @@ so what ships is plain HTML, CSS and a little JavaScript.
 Two tools:
 [`uv`](https://docs.astral.sh/uv/) and [`just`](https://just.systems).
 Every recipe shells out to `uv`,
-which handles Python and Zensical for you,
+which handles Python, Zensical and the linters for you,
 so there's nothing else to install and no virtualenv to activate.
+
+To run the linters on every commit, install the git hook once:
+
+```bash
+uv run prek install
+```
+
+It runs the checks in `prek.toml` on the files you commit.
+`just ci` runs the same checks over every file, and CI runs `just ci`.
+See [CONTRIBUTING.md](CONTRIBUTING.md#pre-commit-hooks) for what they cover.
 
 ## Using it
 

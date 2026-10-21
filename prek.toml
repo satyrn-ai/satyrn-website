@@ -1,0 +1,55 @@
+# File-level checks, run at commit time by `prek install` and over every
+# tracked file by `just lint`, which `just ci` and CI both call.
+# Checks that need a built site stay in the justfile.
+minimum_prek_version = "0.5.5"
+
+# Lock files are generated, and the build output is never tracked.
+exclude = { glob = ["uv.lock", "site/**"] }
+
+[[repos]]
+repo = "builtin"
+hooks = [
+    # The largest tracked file is a 248 KiB photo. --enforce-all makes
+    # `--all-files` check what is already committed, not just new additions.
+    { id = "check-added-large-files", args = ["--maxkb=500", "--enforce-all"] },
+    { id = "check-case-conflict" },
+    { id = "check-merge-conflict" },
+    { id = "check-toml" },
+    { id = "check-yaml" },
+    # .all-contributorsrc is JSON without the extension. The .vscode files
+    # carry comments, so they are JSONC whatever their extension says.
+    { id = "check-json", files = '^\.all-contributorsrc$', types = ["text"] },
+    { id = "check-jsonc", files = '^(\.vscode/.*\.json|.*\.jsonc)$', types = ["text"] },
+    { id = "end-of-file-fixer" },
+    { id = "mixed-line-ending", args = ["--fix=lf"] },
+    # Two trailing spaces are a Markdown line break.
+    { id = "trailing-whitespace", args = ["--markdown-linebreak-ext=md"] },
+]
+
+[[repos]]
+repo = "https://github.com/editorconfig-checker/editorconfig-checker.python"
+rev = "e8b4e28241a9ae8296ba6e4a491b5da4eda73283" # frozen: 3.11.1
+hooks = [
+    # The CSS and the justfile indent continuation lines to align them, which
+    # no indent size describes. Indent style is still checked.
+    { id = "editorconfig-checker", args = ["-disable-indent-size"] },
+]
+
+[[repos]]
+repo = "https://github.com/DavidAnson/markdownlint-cli2"
+rev = "b82a6c8896e491b9cb377a99ff3412131920681b" # frozen: v0.23.2
+hooks = [
+    # docs/ is deliberately out of scope.
+    { id = "markdownlint-cli2", require_serial = true, files = '^(src/.*|[^/]*)\.md$' },
+]
+
+[[repos]]
+repo = "local"
+hooks = [
+    # Local rather than cspell-cli's hook repo: that package depends on
+    # `cspell@^10.0.1`, which would resolve the newest 10.x at install time.
+    { id = "cspell", name = "cspell", language = "node", entry = "cspell --no-progress --no-summary --no-must-find-files", additional_dependencies = ["cspell@10.0.1"], files = '^(src/.*|[^/]*)\.md$' },
+    # prek builds this hook its own Python env, so a commit from a GUI client
+    # needs neither `just` nor `uv` on PATH. PyYAML matches uv.lock.
+    { id = "check-frontmatter", name = "check front matter", language = "python", entry = "python scripts/check_frontmatter.py", additional_dependencies = ["pyyaml==6.0.3"], pass_filenames = false, files = '^src/.*\.md$' },
+]

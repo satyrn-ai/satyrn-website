@@ -86,33 +86,7 @@ check-assets: build
 
 # Check every page's front matter parses as YAML
 check-frontmatter:
-    #!/usr/bin/env -S uv run --with pyyaml python
-    import pathlib, sys, yaml
-    # Zensical parses front matter inside `except Exception: pass`, so a stray
-    # colon silently discards the whole block -- taking `template:` with it --
-    # and the build still reports success. --strict cannot see this because
-    # nothing is ever emitted. Hence checking it here.
-    bad = []
-    for page in sorted(pathlib.Path("src").rglob("*.md")):
-        text = page.read_text()
-        if not text.startswith("---"):
-            continue
-        _, _, rest = text.partition("---")
-        block, sep, _ = rest.partition("\n---")
-        if not sep:
-            bad.append((page, "front matter is never closed"))
-            continue
-        try:
-            meta = yaml.safe_load(block)
-        except yaml.YAMLError as e:
-            bad.append((page, str(e).split("\n")[0]))
-            continue
-        if not isinstance(meta, dict):
-            bad.append((page, f"parsed as {type(meta).__name__}, not a mapping"))
-    for page, why in bad:
-        print(f"{page}: {why}")
-    print(f"{len(bad)} page(s) with unparseable front matter")
-    sys.exit(1 if bad else 0)
+    uv run --with pyyaml python scripts/check_frontmatter.py
 
 # Check the menu bar matches extra.nav_menu, in order
 check-nav: build
@@ -263,7 +237,7 @@ check-blog: build
     print(f"\n{len(failures)} blog check(s) failed" if failures else "\nAll blog checks passed")
     sys.exit(1 if failures else 0)
 
-# Like `lint`, this needs npx, plus a Chrome that pa11y's puppeteer can launch.
+# This needs npx, plus a Chrome that pa11y's puppeteer can launch.
 # GitHub runners have both. It is deliberately NOT in `ci` yet: it was written
 # on a machine with neither, so it has never run. Run it once in CI, fix what it
 # reports, then add it to the `ci` recipe below.
@@ -325,19 +299,11 @@ check-placeholders: build
     print(f"{len(hits)} placeholder(s) in the built site")
     sys.exit(1 if hits else 0)
 
-# Lint markdown and spelling. The only recipe that needs node; GitHub runners
-# ship it preinstalled, so this costs a package download and no setup step.
-#
-# Versions are pinned. Unpinned, `npx -y` resolves latest on every run, so a new
-# major could add a rule and fail CI with nothing in the repo having changed.
+# Run every hook in prek.toml over every tracked file: markdown, spelling, front
+# matter, whitespace and config syntax. `uv run prek install` runs the same hooks
+# at commit time. prek uses node if it is installed and downloads it otherwise.
 lint:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    command -v npx >/dev/null || {
-      echo "lint needs npx (ships with node). GitHub runners have it preinstalled;"
-      echo "locally, install node or skip this recipe."; exit 1; }
-    npx -y markdownlint-cli2@0.23.2 "src/**/*.md" "*.md"
-    npx -y cspell@10.0.1 --no-progress --no-summary "src/**/*.md" "*.md"
+    uv run prek run --all-files --show-diff-on-failure
 
 # Report what one visit to the landing page actually downloads
 weigh: build
@@ -443,7 +409,7 @@ og-image:
     print(f"{out}  {card.width}x{card.height}  {out.stat().st_size} bytes")
 
 # Everything CI should run before a merge
-ci: rebuild check-frontmatter check-nav check-blog check-assets check-placeholders lint weigh
+ci: rebuild check-nav check-blog check-assets check-placeholders lint weigh
 
 # Regenerate the contributor avatar list in src/index.md from .all-contributorsrc
 contributors:
