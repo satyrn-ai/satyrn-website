@@ -62,9 +62,9 @@ for us. Conversation, sharing, innovation, and building software tools.
 
 <div class="satyrn-section satyrn-ai-our-way" markdown>
 
-## What we do
+## What We Do
 
-A human-centric home for Python developers. Conversation, sharing, innovation,
+Create a human-centric home for Python developers. Conversation, sharing, innovation,
 and building software tools — AI Our Way, trusted from us, for us.
 
 <div class="satyrn-status__grid" markdown>
@@ -122,9 +122,9 @@ a group learning and teaching together.
 
 ### [Satyrn Evals](projects/evals.md)
 
-Evidence-first, fine-grained evals baseline you can trust, use, and add
+An evidence-first, fine-grained evals baseline you can trust, use, and add
 to. Run [Pi](https://pi.dev) with a local model,
-then [report what happened](https://github.com/pauleveritt/satyrn-evals-collector/blob/main/docs/notes/000_engine_engage.md).
+then [report what happened](https://github.com/satyrn-ai/satyrn-evals-collector/blob/main/docs/notes/000_engine_engage.md).
 Your notes become the baseline our own engine has to beat.
 
 </div>
@@ -134,7 +134,7 @@ Your notes become the baseline our own engine has to beat.
 ### [Satyrn Engine](projects/engine.md)
 
 A Python implementer engine connected as a Pi extension to keep small models on-track.
-Currently, beats base Pi on medium tasks. For now, useful as a target for Evals.
+Currently, it beats base Pi on medium tasks. For now, useful as a target for Evals.
 
 </div>
 
@@ -151,9 +151,9 @@ using old-school, pre-algorithm social web technologies.
 
 ### [Satyrn Zen](projects/zen.md)
 
-Help Python developers master new, marketable skills; contributors use our
-projects in their workflows and share results; and builders making AI for routine
-computers and work.
+Help Python developers master new, marketable skills. Contributors use our
+projects in their workflows and share results. Builders make AI for
+consumer-level computers and work.
 
 </div>
 
