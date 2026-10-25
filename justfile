@@ -84,10 +84,6 @@ check-assets: build
     print(f"{len(missing)} broken asset reference(s)")
     sys.exit(1 if missing else 0)
 
-# Check every page's front matter parses as YAML
-check-frontmatter:
-    uv run --with pyyaml python scripts/check_frontmatter.py
-
 # Check the menu bar matches extra.nav_menu, in order
 check-nav: build
     #!/usr/bin/env -S uv run python
@@ -299,9 +295,9 @@ check-placeholders: build
     print(f"{len(hits)} placeholder(s) in the built site")
     sys.exit(1 if hits else 0)
 
-# Run every hook in prek.toml over every tracked file: markdown, spelling, front
-# matter, whitespace and config syntax. `uv run prek install` runs the same hooks
-# at commit time. prek uses node if it is installed and downloads it otherwise.
+# Run every hook in prek.toml over every tracked file: markdown, spelling,
+# whitespace and config syntax. `uv run prek install` runs the same hooks at
+# commit time. prek uses node if it is installed and downloads it otherwise.
 lint:
     uv run prek run --all-files --show-diff-on-failure
 

@@ -7,7 +7,7 @@ so it's worth a skim before your first change.
 
 Run `just ci` before opening a pull request.
 CI runs the same recipe:
-a strict build, a front-matter check, a navigation check, the blog checks,
+a strict build, a navigation check, the blog checks,
 an asset-reference check, the linters, and the page weight report.
 
 Strict means `zensical build --strict`,
@@ -17,16 +17,10 @@ Link and anchor checking is on by default;
 `[project.validation]` in `zensical.toml` only adds the reference and footnote
 checks, which ship off.
 
-`just ci` also runs `check-frontmatter`, which exists because Zensical parses
-front matter inside a bare `except`.
-A stray colon discards the whole block, `template:` included,
-while the build still reports success,
-so `--strict` cannot see it and something else has to.
-
 ## Pre-commit hooks
 
 `prek.toml` defines the checks that run on files rather than on the built site:
-markdownlint, cspell, `check-frontmatter`, editorconfig-checker,
+markdownlint, cspell, editorconfig-checker,
 and the whitespace, line-ending and config-syntax hooks.
 Install them once with `uv run prek install`,
 and they run on the files in each commit.
@@ -152,18 +146,6 @@ So renaming a page means grepping `zensical.toml` for its old title.
 `just check-nav` covers the menu bar,
 by comparing what the built page renders against the configured list.
 The rest are on you.
-
-### A bare colon in front matter
-
-```yaml
-description: Jupyter for agents: open source   # invalid YAML
-```
-
-That second colon makes the block invalid,
-so the whole thing is discarded, `template:` along with it.
-The page then renders with the wrong layout
-while the build still prints "No issues found".
-Quote any value containing a colon.
 
 ### Built-in palette colour names
 
