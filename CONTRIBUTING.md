@@ -19,20 +19,24 @@ checks, which ship off.
 
 ## Pre-commit hooks
 
-`prek.toml` defines the checks that run on files rather than on the built site:
+`prek.toml` defines the checks that run on source files rather than on the built site:
 markdownlint, cspell, editorconfig-checker,
 and the whitespace, line-ending and config-syntax hooks.
 Install them once with `uv run prek install`,
 and they run on the files in each commit.
+The installed hook calls the prek in `.venv`,
+so run `uv sync` again if you delete `.venv`.
+The first commit after installing is slow
+while prek sets up the environments its hooks need.
 
 `just lint` runs the same hooks over every tracked file,
-so a new post or page is skipped until it has been through `git add`.
+so a new post or page is skipped until it has been staged with `git add`.
 `just ci` calls `just lint`, and CI runs `just ci`,
 so a markdownlint or spelling failure shows up at commit time
-instead of in CI.
+instead of in a pull request's CI run.
 
 The whitespace and end-of-file hooks fix the file and fail the commit.
-Stage their changes and commit again.
+Stage the fixed file and commit again.
 
 [prek](https://prek.j178.dev/) is a drop-in replacement for pre-commit.
 `prek.toml` is its own format, which plain `pre-commit` cannot read.
