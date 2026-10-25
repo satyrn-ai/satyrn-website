@@ -439,6 +439,15 @@ categories = ["categories", "tags"]
 json_feed_enabled = false
 feeds_filenames = { rss_created = "feed.xml" }
 
+# /llms.txt, plus a Markdown copy of each listed page beside its HTML. Only
+# listed pages are included, so a new top-level page needs adding to About.
+[project.plugins.llmstxt]
+
+[project.plugins.llmstxt.sections]
+About = ["index.md", "mission.md", "local-first.md", "get-involved.md"]
+Projects = ["projects/*.md"]
+Blog = ["blog/posts/*.md"]
+
 # The landing page's latest-post cards: main.py at the repository root, looped
 # over in src/index.md. Only pages with `render_macros: true` are rendered.
 [project.plugins.macros]
