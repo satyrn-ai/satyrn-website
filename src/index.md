@@ -193,7 +193,7 @@ and build something we're proud of.
 
 <div class="satyrn-involve__list" markdown>
 
-- **[Browse open issues](https://github.com/search?q=org%3Asatyrn-ai+is%3Aissue+is%3Aopen&type=issues)**
+- **[Browse open issues](https://github.com/search?q=org%3Asatyrn-ai+is%3Aissue+is%3Aopen&type=issues&s=created&o=desc)**
    Bug reports from real work are hard to fake and easy to act on.
 - **[Fix the docs.](https://github.com/satyrn-ai/satyrn-zen)**
    If something took you an hour to figure out, that hour was a documentation bug.
