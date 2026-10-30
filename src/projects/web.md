@@ -3,15 +3,16 @@ title: Satyrn Web
 description: "Starting a conversation about AI Our Way and Laptop AI — building community through old-school web technology."
 ---
 
-We want to start a conversation in the world of Python about AI Our Way and Laptop AI, build a network using old-school web technology, and amplify all the people doing good, innovative work.
+We want to start a conversation in the world of Python about AI Our Way and Laptop AI,
+build a network using old-school web technology, and amplify all the people doing good,
+innovative work.
 
 ## Where to Find Us
 
 ### Mastodon
 
-Follow us on Mastodon for updates, discussions, and links to interesting work in the Python AI community.
-
-Coming soon — follow along on our other platforms in the meantime.
+Follow us on [Mastodon](https://social.satyrn.ai/explore) for updates, discussions,
+and links to interesting work in the Python AI community.
 
 ### YouTube
 
@@ -21,9 +22,8 @@ Coming soon — stay tuned.
 
 ### LinkedIn
 
-Connect with us on LinkedIn for professional updates, community news, and opportunities to get involved.
-
-Coming soon — we'll be here shortly.
+Connect with us on [LinkedIn](https://www.linkedin.com/company/satyrn-ai/home/)
+for professional updates, community news, and opportunities to get involved.
 
 ## Coming Soon
 
