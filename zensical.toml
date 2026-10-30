@@ -344,7 +344,7 @@ toggle.name = "Switch to light mode"
 # LinkedIn and YouTube are placeholders until the real accounts are supplied.
 [[project.extra.social]]
 icon = "fontawesome/brands/linkedin"
-link = "#"
+link = "https://www.linkedin.com/company/satyrn-ai/home/"
 name = "LinkedIn"
 
 [[project.extra.social]]
